@@ -5,6 +5,7 @@
  */
 import { env } from 'cloudflare:test';
 import { parseConfig } from '../src/core/config';
+import { randomToken, sha256Hex } from '../src/core/crypto';
 import { EventBus, type DomainEvent } from '../src/core/events';
 import type { Clock, Logger, PushSender } from '../src/core/ports';
 import { createApp } from '../src/modules/app';
@@ -126,3 +127,37 @@ export async function resetDb() {
   ];
   await env.DB.batch(sorted.map((n) => env.DB.prepare(`DELETE FROM "${n}"`)));
 }
+
+/** A harness with a valid session (inserted directly; the auth flow has its own tests). */
+export async function authed(opts: Parameters<typeof harness>[0] = {}): Promise<Harness> {
+  const h = harness(opts);
+  const token = randomToken(32);
+  await db.run(
+    'INSERT INTO sessions (id_hash, created_at, expires_at, user_agent) VALUES (?, ?, ?, ?)',
+    await sha256Hex(token),
+    h.clock.now(),
+    h.clock.now() + 30 * 86400,
+    'test',
+  );
+  h.cookie = `__Host-session=${token}`;
+  return h;
+}
+
+/** POST/PATCH/DELETE shorthands that assert the expected status. */
+export async function call<T = any>(
+  h: Harness,
+  method: string,
+  path: string,
+  json?: unknown,
+  expectStatus?: number,
+): Promise<T> {
+  const r = await h.json<T>(path, { method, ...(json !== undefined ? { json } : {}) });
+  if (expectStatus !== undefined && r.status !== expectStatus) {
+    throw new Error(
+      `${method} ${path} → ${r.status} (expected ${expectStatus}): ${JSON.stringify(r.body)}`,
+    );
+  }
+  return r.body;
+}
+
+export const HOUR = 3600;

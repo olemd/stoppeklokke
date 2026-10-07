@@ -4,7 +4,24 @@
  * debug. Order matters only for export collections, which carry their own order.
  */
 import { authModule } from './auth';
+import { clientsModule } from './clients';
+import { entriesModule } from './entries';
 import { healthModule } from './health';
+import { projectsModule } from './projects';
+import { ratesModule } from './rates';
+import { settingsModule } from './settings';
+import { timerModule } from './timer';
 import type { Module } from './types';
+import { workspacesModule } from './workspaces';
 
-export const modules: Module[] = [healthModule, authModule];
+export const modules: Module[] = [
+  healthModule,
+  authModule,
+  settingsModule,
+  workspacesModule,
+  clientsModule,
+  projectsModule,
+  timerModule,
+  entriesModule,
+  ratesModule,
+];
