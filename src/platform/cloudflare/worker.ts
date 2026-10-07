@@ -9,9 +9,9 @@ import { consoleLogger, systemClock } from '../../core/ports';
 import { createApp } from '../../modules/app';
 import { modules } from '../../modules';
 import { runCron } from '../../modules/cron';
+import { pushSenderFromConfig } from '../../modules/push/sender';
 import type { Ctx } from '../../modules/types';
 import { d1Db } from './d1';
-import { pushSender } from './push';
 
 export interface Env {
   DB: D1Database;
@@ -48,7 +48,7 @@ export function buildCtx(env: Env, exec: { waitUntil(p: Promise<unknown>): void 
     log: consoleLogger,
     scheduler,
     events,
-    push: pushSender(parsed.config),
+    push: pushSenderFromConfig(parsed.config, systemClock),
   };
   for (const m of modules) {
     const handler = m.onEvent;

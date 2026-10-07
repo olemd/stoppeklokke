@@ -9,6 +9,7 @@ import { entriesModule } from './entries';
 import { healthModule } from './health';
 import { locksModule } from './locks';
 import { projectsModule } from './projects';
+import { pushModule } from './push';
 import { ratesModule } from './rates';
 import { reportsModule } from './reports';
 import { settingsModule } from './settings';
@@ -30,4 +31,5 @@ export const modules: Module[] = [
   suggestionsModule,
   reportsModule,
   locksModule,
+  pushModule,
 ];

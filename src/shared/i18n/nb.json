@@ -338,5 +338,29 @@
     "pending_other": "{count} handlinger på klokka venter på synkronisering",
     "failed": "En handling på klokka fra {time} kunne ikke synkroniseres: {message}",
     "dismiss": "Lukk"
+  },
+  "push": {
+    "alertTitle": "Tid for en pause?",
+    "alertBody": "Du har holdt på med {project} urimelig lenge: {duration}. Ta en pause?",
+    "tickTitle": "Tikk takk",
+    "tickBody": "Tikk takk — {duration} på {project}",
+    "stoppedTitle": "Klokka er stoppet",
+    "stoppedBody": "Stoppet {project} etter {duration}.",
+    "autoStoppedBody": "Klokka for {project} ble stoppet automatisk etter {duration}.",
+    "stop": "Stopp",
+    "keep": "Fortsett",
+    "yourTimer": "klokka",
+    "testTitle": "Stoppeklokke",
+    "testBody": "Varsler fungerer på denne enheten.",
+    "title": "Varsler på denne enheten",
+    "enable": "Slå på varsler",
+    "enabled": "Varsler er på for denne enheten",
+    "disable": "Slå av på denne enheten",
+    "test": "Send test",
+    "testSent": "Test sendt til {count} enheter",
+    "devices": "Enheter med varsler",
+    "unsupported": "Denne nettleseren kan ikke vise varsler. På iPhone og iPad må du først legge Stoppeklokke til på Hjem-skjermen, åpne den derfra og logge inn i den installerte appen.",
+    "denied": "Varsler er blokkert for dette nettstedet. Tillat dem i nettleserens innstillinger for nettstedet.",
+    "notConfigured": "Push er ikke satt opp på denne serveren (VAPID-nøkler mangler)."
   }
 }

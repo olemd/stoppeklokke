@@ -338,5 +338,29 @@
     "pending_other": "{count} timer actions waiting to sync",
     "failed": "A timer action from {time} could not be synced: {message}",
     "dismiss": "Dismiss"
+  },
+  "push": {
+    "alertTitle": "Time for a break?",
+    "alertBody": "You've been on {project} for an unreasonably long time: {duration}. Take a break?",
+    "tickTitle": "Tick tock",
+    "tickBody": "Tick tock — {duration} on {project}",
+    "stoppedTitle": "Timer stopped",
+    "stoppedBody": "Stopped {project} after {duration}.",
+    "autoStoppedBody": "The timer for {project} was stopped automatically after {duration}.",
+    "stop": "Stop",
+    "keep": "Keep going",
+    "yourTimer": "your timer",
+    "testTitle": "Stoppeklokke",
+    "testBody": "Notifications work on this device.",
+    "title": "Notifications on this device",
+    "enable": "Turn on notifications",
+    "enabled": "Notifications are on for this device",
+    "disable": "Turn off on this device",
+    "test": "Send test",
+    "testSent": "Test sent to {count} devices",
+    "devices": "Devices with notifications",
+    "unsupported": "This browser cannot show notifications. On iPhone and iPad, add Stoppeklokke to the home screen first, open it from there and log in inside the installed app.",
+    "denied": "Notifications are blocked for this site. Allow them in the browser's site settings.",
+    "notConfigured": "Push is not configured on this server (VAPID keys missing)."
   }
 }

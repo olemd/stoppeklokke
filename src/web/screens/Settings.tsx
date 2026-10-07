@@ -7,6 +7,7 @@
 import { useEffect, useState } from 'preact/hooks';
 import { ROUNDING_STEPS } from '../../core/time/duration';
 import { confirmAction } from '../components/Dialog';
+import { PushSettings } from '../components/PushSettings';
 import { showError, toast } from '../components/Toast';
 import { del, get, patch, post } from '../lib/api';
 import { dateLong, moneyInput, parseMoney } from '../lib/fmt';
@@ -252,6 +253,10 @@ export function SettingsScreen() {
             onSave={(n) => update({ idle_stop_after_min: n })}
           />
         </div>
+      </section>
+
+      <section class="panel stack" aria-label={t('push.title')}>
+        <PushSettings />
       </section>
 
       <section class="panel stack" aria-labelledby="s-pk">
