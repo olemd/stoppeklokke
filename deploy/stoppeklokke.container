@@ -1,0 +1,33 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Podman Quadlet unit for a rootless, self-hosted Stoppeklokke
+# (docs/self-hosting.md). Install as
+#   ~/.config/containers/systemd/stoppeklokke.container
+# then: systemctl --user daemon-reload && systemctl --user start stoppeklokke
+
+[Unit]
+Description=Stoppeklokke time tracker
+Wants=network-online.target
+After=network-online.target
+
+[Container]
+Image=ghcr.io/olemd/stoppeklokke:latest
+ContainerName=stoppeklokke
+# Only reachable from this host: the reverse proxy (Caddy) forwards to it.
+PublishPort=127.0.0.1:8787:8787
+# SQLite database (and its WAL files) live in this named volume.
+Volume=stoppeklokke-data:/data:Z
+EnvironmentFile=%h/.config/stoppeklokke/stoppeklokke.env
+ReadOnly=true
+Tmpfs=/tmp
+NoNewPrivileges=true
+DropCapability=ALL
+# Pull a newer :latest with `podman auto-update` (or the podman-auto-update.timer).
+AutoUpdate=registry
+
+[Service]
+Restart=always
+# Give the server time to finish in-flight work on stop (it handles SIGTERM).
+TimeoutStopSec=30
+
+[Install]
+WantedBy=default.target

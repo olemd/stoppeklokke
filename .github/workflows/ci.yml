@@ -33,6 +33,8 @@ jobs:
       - run: bun run typecheck
       - run: bun run i18n:check
       - run: bun run test
+      # The same suite against the self-hosted platform (SQLite on Bun).
+      - run: bun run test:bun
       - run: bun run build
       - name: Licence check (AGPL-compatible dependencies only)
         run: bun run licenses
