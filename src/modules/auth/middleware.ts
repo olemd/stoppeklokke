@@ -19,6 +19,12 @@ export function setBearerVerifier(v: BearerVerifier) {
 
 const READ_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
 
+const MUST_REGISTER_ALLOWED = new Set([
+  '/api/auth/register/options',
+  '/api/auth/register/verify',
+  '/api/auth/logout',
+]);
+
 export function authenticate(publicPaths: Set<string>): MiddlewareHandler<AppEnv> {
   return async (c, next) => {
     const authz = c.req.header('authorization');
@@ -34,8 +40,18 @@ export function authenticate(publicPaths: Set<string>): MiddlewareHandler<AppEnv
       if (s) auth = { kind: 'session', ...s };
     }
     c.set('auth', auth);
-    if (!auth && !publicPaths.has(c.req.path)) {
+    const isPublic = publicPaths.has(c.req.path);
+    if (!auth && !isPublic) {
       return c.json({ error: 'unauthorized', message: 'Login required' }, 401);
+    }
+    // A recovery-code session may only register a new passkey (or log out).
+    if (
+      auth?.kind === 'session' &&
+      auth.mustRegister &&
+      !isPublic &&
+      !MUST_REGISTER_ALLOWED.has(c.req.path)
+    ) {
+      return c.json({ error: 'must_register', message: 'Register a new passkey to continue' }, 403);
     }
     await next();
   };

@@ -23,7 +23,7 @@ export interface Ctx {
 }
 
 export type AuthInfo =
-  | { kind: 'session'; idHash: string; expiresAt: number }
+  | { kind: 'session'; idHash: string; expiresAt: number; mustRegister: boolean }
   | { kind: 'token'; tokenId: number; scope: 'read' | 'write' };
 
 export interface AppEnv {
