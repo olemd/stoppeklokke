@@ -63,6 +63,16 @@ export async function enqueue(op: Omit<QueuedOp, 'queued_at'>) {
   await refreshCounts();
 }
 
+/**
+ * Forget queued and failed timer actions. Called on logout: actions queued in
+ * one session must never be replayed in a later one.
+ */
+export async function clearOfflineData() {
+  await tx(QUEUE, 'readwrite', (st) => st.clear());
+  await tx(FAILED, 'readwrite', (st) => st.clear());
+  await refreshCounts();
+}
+
 export async function dismissFailed(id: number) {
   await tx(FAILED, 'readwrite', (s) => s.delete(id));
   await refreshCounts();

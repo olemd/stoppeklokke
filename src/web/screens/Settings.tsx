@@ -12,6 +12,7 @@ import { del, get, patch, post } from '../lib/api';
 import { dateLong, moneyInput, parseMoney } from '../lib/fmt';
 import { withConflicts } from '../lib/flows';
 import { localeNames, setLocale, t } from '../lib/i18n';
+import { clearOfflineData } from '../lib/offline';
 import { defaultPasskeyLabel, passkeyErrorMessage, registerPasskey } from '../lib/passkey';
 import { loadAuth, settings, type Settings } from '../lib/store';
 
@@ -318,6 +319,7 @@ export function SettingsScreen() {
             onClick={async () => {
               await post('/auth/logout').catch(showError);
               navigator.serviceWorker?.controller?.postMessage('clear-api-cache');
+              await clearOfflineData();
               await loadAuth();
             }}
           >
@@ -337,6 +339,7 @@ export function SettingsScreen() {
                 return;
               await post('/auth/logout-all').catch(showError);
               navigator.serviceWorker?.controller?.postMessage('clear-api-cache');
+              await clearOfflineData();
               await loadAuth();
             }}
           >

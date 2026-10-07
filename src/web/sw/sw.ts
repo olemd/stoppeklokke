@@ -42,21 +42,47 @@ self.addEventListener('activate', (event) => {
   );
 });
 
+/**
+ * Only the GET endpoints the app needs to show its last known state offline
+ * are cached (§7.3). Everything else (passkeys, push subscriptions, tokens,
+ * webhooks, exports, reports) honours the API's `no-store` and stays off disk.
+ */
+const OFFLINE_API =
+  /^\/api\/(auth\/status|settings|workspaces|clients|projects|timer|entries|suggestions\/descriptions)\/?$/;
+
+/**
+ * Bumped when logout clears the API cache, so a response that was still in
+ * flight at logout is never written back afterwards.
+ */
+let generation = 0;
+
 /** Logout asks the worker to forget cached API responses (personal data). */
 self.addEventListener('message', (event) => {
-  if (event.data === 'clear-api-cache') event.waitUntil(caches.delete(API));
+  if (event.data === 'clear-api-cache') {
+    generation++;
+    event.waitUntil(caches.delete(API));
+  }
 });
 
 async function networkFirst(
   request: Request,
   cacheName: string,
   fallback?: string,
+  keepAlive?: (p: Promise<unknown>) => void,
 ): Promise<Response> {
+  const gen = generation;
   try {
     const res = await fetch(request);
     if (res.ok && request.method === 'GET') {
       const copy = res.clone();
-      void caches.open(cacheName).then((c) => c.put(request, copy));
+      const store = (async () => {
+        if (gen !== generation) return;
+        const cache = await caches.open(cacheName);
+        await cache.put(request, copy);
+        // Logout happened while writing: undo, the data must not persist.
+        if (gen !== generation) await cache.delete(request);
+      })();
+      keepAlive?.(store);
     }
     return res;
   } catch (err) {
@@ -76,12 +102,10 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(request.url);
   if (url.origin !== self.location.origin || request.method !== 'GET') return;
   if (url.pathname.startsWith('/api/')) {
-    // Full data exports are never cached. Auth status IS cached so the app can
-    // show the last known state offline; logout clears this cache.
-    if (url.pathname.startsWith('/api/export')) return;
-    event.respondWith(networkFirst(request, API));
+    if (!OFFLINE_API.test(url.pathname)) return;
+    event.respondWith(networkFirst(request, API, undefined, (p) => event.waitUntil(p)));
   } else if (request.mode === 'navigate') {
-    event.respondWith(networkFirst(request, SHELL, '/'));
+    event.respondWith(networkFirst(request, SHELL, '/', (p) => event.waitUntil(p)));
   } else if (url.pathname.startsWith('/assets/') || url.pathname.startsWith('/icons/')) {
     event.respondWith(cacheFirst(request));
   }
