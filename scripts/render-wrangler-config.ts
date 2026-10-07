@@ -63,6 +63,6 @@ if (domain) config.routes = [{ pattern: domain, custom_domain: true }];
 const header =
   '// GENERATED from wrangler.template.jsonc by scripts/render-wrangler-config.ts. Do not edit or commit.\n';
 await Bun.write(join(root, 'wrangler.jsonc'), `${header + JSON.stringify(config, null, 2)}\n`);
-console.log(
-  `wrangler.jsonc rendered (worker ${values.WORKER_NAME}, origin ${values.ORIGIN}${domain ? `, domain ${domain}` : ''})`,
-);
+// Values from the environment are deliberately not echoed: CI logs are
+// visible to anyone who can read the repository.
+console.log('wrangler.jsonc rendered from wrangler.template.jsonc');
