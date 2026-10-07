@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.3.0](https://github.com/olemd/stoppeklokke/compare/stoppeklokke-v0.2.1...stoppeklokke-v0.3.0) (2026-10-07)
+
+
+### Features
+
+* **bun:** name the proxy address when X-Forwarded-For is not trusted ([4609033](https://github.com/olemd/stoppeklokke/commit/4609033b78418d787808aeeccff2f2d732a837cb))
+* self-hosted platform on Bun with SQLite (no Cloudflare needed) ([d9ca68c](https://github.com/olemd/stoppeklokke/commit/d9ca68c6dcf7416fccbac25fb7b694f9f7eee817))
+
+
+### Bug Fixes
+
+* **bun:** only believe X-Forwarded-For from trusted proxies ([24a6269](https://github.com/olemd/stoppeklokke/commit/24a626947603f81865e3770f062a1859cce4db92))
+
 ## [0.2.1](https://github.com/olemd/stoppeklokke/compare/stoppeklokke-v0.2.0...stoppeklokke-v0.2.1) (2026-10-07)
 
 
