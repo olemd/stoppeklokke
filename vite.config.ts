@@ -5,8 +5,9 @@
  */
 import preact from '@preact/preset-vite';
 import { execSync } from 'node:child_process';
-import { readFileSync } from 'node:fs';
-import { defineConfig } from 'vite';
+import { createHash } from 'node:crypto';
+import { readFileSync, readdirSync } from 'node:fs';
+import { defineConfig, type Plugin } from 'vite';
 
 const pkg = JSON.parse(readFileSync('./package.json', 'utf8')) as { version: string };
 const gitSha = (() => {
@@ -17,10 +18,39 @@ const gitSha = (() => {
   }
 })();
 
+/**
+ * Builds src/web/sw/sw.ts to /sw.js and injects the precache list (every
+ * emitted file plus the public icons/manifest) and a version derived from it.
+ */
+function serviceWorker(): Plugin {
+  return {
+    name: 'stoppeklokke-sw',
+    apply: 'build',
+    generateBundle(_opts, bundle) {
+      const sw = bundle['sw.js'];
+      if (!sw || sw.type !== 'chunk') this.error('sw.js chunk missing');
+      const emitted = Object.keys(bundle).filter(
+        (f) => f !== 'sw.js' && f !== 'index.html' && !f.endsWith('.map') && f !== '_headers',
+      );
+      const publicFiles = readdirSync('src/web/public/icons').map((f) => `/icons/${f}`);
+      const precache = [
+        '/',
+        '/manifest.webmanifest',
+        ...publicFiles,
+        ...emitted.map((f) => `/${f}`),
+      ].sort();
+      const version = createHash('sha256').update(precache.join('\n')).digest('hex').slice(0, 12);
+      sw.code = sw.code
+        .replace(/__PRECACHE__/g, JSON.stringify(precache))
+        .replace(/__VERSION__/g, JSON.stringify(version));
+    },
+  };
+}
+
 export default defineConfig({
   root: 'src/web',
   publicDir: 'public',
-  plugins: [preact()],
+  plugins: [preact(), serviceWorker()],
   define: {
     __APP_VERSION__: JSON.stringify(process.env.APP_VERSION || pkg.version),
     __GIT_SHA__: JSON.stringify(process.env.GIT_SHA || gitSha),
@@ -35,5 +65,11 @@ export default defineConfig({
     // No inline scripts/modules: the CSP is default-src 'self' (§5.5).
     modulePreload: { polyfill: false },
     assetsInlineLimit: 0,
+    rollupOptions: {
+      input: { main: 'src/web/index.html', sw: 'src/web/sw/sw.ts' },
+      output: {
+        entryFileNames: (chunk) => (chunk.name === 'sw' ? 'sw.js' : 'assets/[name]-[hash].js'),
+      },
+    },
   },
 });

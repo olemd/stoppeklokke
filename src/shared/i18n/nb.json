@@ -331,5 +331,12 @@
     "locked": "Timeprisen er låst på {count} føringer",
     "released": "Timeprisen er frigjort på {count} føringer",
     "skipped": "{count} fakturerte føringer ble hoppet over"
+  },
+  "offline": {
+    "queued": "Lagret på denne enheten. Synkroniseres når du er på nett igjen.",
+    "pending_one": "{count} handling på klokka venter på synkronisering",
+    "pending_other": "{count} handlinger på klokka venter på synkronisering",
+    "failed": "En handling på klokka fra {time} kunne ikke synkroniseres: {message}",
+    "dismiss": "Lukk"
   }
 }

@@ -1050,3 +1050,14 @@ a.btn {
 .invoice .report-table td:first-child {
   width: 46%;
 }
+
+.sync-problem {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 1rem;
+  border-bottom: 2px solid var(--stop);
+  background: var(--surface);
+}

@@ -5,7 +5,9 @@ import { DialogHost } from './components/Dialog';
 import { Footer } from './components/Footer';
 import { showError, ToastHost } from './components/Toast';
 import { patch } from './lib/api';
+import { time } from './lib/fmt';
 import { setLocale, t } from './lib/i18n';
+import { dismissFailed, failedOps, initOffline, pendingCount } from './lib/offline';
 import { navigate, onLinkClick, route } from './lib/router';
 import {
   activeWorkspaceId,
@@ -13,6 +15,7 @@ import {
   auth,
   loadAll,
   loadAuth,
+  loadTimer,
   multiWorkspace,
   online,
   settings,
@@ -112,6 +115,27 @@ function Routes() {
   return <TimerScreen />;
 }
 
+/** Offline queue status (§7.3): pending actions and failed replays, never silent. */
+function SyncStatus() {
+  return (
+    <>
+      {pendingCount.value > 0 && (
+        <p class="offline-banner" role="status">
+          {t('offline.pending', { count: pendingCount.value })}
+        </p>
+      )}
+      {failedOps.value.map((f) => (
+        <div class="sync-problem" role="alert" key={f.id}>
+          <span>{t('offline.failed', { time: time(f.queued_at), message: f.message })}</span>
+          <button type="button" class="btn plain small" onClick={() => void dismissFailed(f.id!)}>
+            {t('offline.dismiss')}
+          </button>
+        </div>
+      ))}
+    </>
+  );
+}
+
 function Shell({ children, bare = false }: { children: preact.ComponentChildren; bare?: boolean }) {
   return (
     <div class="app" onClick={onLinkClick}>
@@ -124,6 +148,7 @@ function Shell({ children, bare = false }: { children: preact.ComponentChildren;
           {t('app.offline')}
         </p>
       )}
+      {!bare && <SyncStatus />}
       <main id="main" class={bare ? 'main narrow' : 'main'}>
         {children}
       </main>
@@ -141,6 +166,10 @@ export function App() {
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
+    // The service worker stopped the timer from a notification action.
+    navigator.serviceWorker?.addEventListener('message', (e) => {
+      if (e.data === 'timer-changed') void loadTimer().catch(() => {});
+    });
     loadAuth()
       .catch(showError)
       .finally(() => setReady(true));
@@ -154,6 +183,7 @@ export function App() {
     loadAll()
       .then(() => settings.value && setLocale(settings.value.locale))
       .then(() => setLoaded(true))
+      .then(() => initOffline(() => void loadTimer().catch(() => {})))
       .catch(showError);
   }, [authed]);
 

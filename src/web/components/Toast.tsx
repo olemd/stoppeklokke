@@ -18,6 +18,8 @@ export function toast(
   text: string,
   opts: { kind?: 'info' | 'error'; action?: Toast['action']; ms?: number } = {},
 ) {
+  // The same message twice in a row (e.g. two queued actions) is shown once.
+  if (!opts.action && toasts.value.some((x) => x.text === text)) return;
   const id = next++;
   toasts.value = [...toasts.value, { id, text, kind: opts.kind ?? 'info', action: opts.action }];
   setTimeout(() => dismiss(id), opts.ms ?? (opts.action ? 10_000 : 5_000));

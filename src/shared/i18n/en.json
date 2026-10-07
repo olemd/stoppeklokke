@@ -331,5 +331,12 @@
     "locked": "Rate locked on {count} entries",
     "released": "Rate released on {count} entries",
     "skipped": "{count} invoiced entries were skipped"
+  },
+  "offline": {
+    "queued": "Saved on this device. It syncs when you are back online.",
+    "pending_one": "{count} timer action waiting to sync",
+    "pending_other": "{count} timer actions waiting to sync",
+    "failed": "A timer action from {time} could not be synced: {message}",
+    "dismiss": "Dismiss"
   }
 }

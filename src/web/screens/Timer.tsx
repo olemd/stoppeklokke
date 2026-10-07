@@ -16,6 +16,7 @@ import { showError, toast } from '../components/Toast';
 import { get, patch, post, qs } from '../lib/api';
 import { entryColor, entryLabel, hm, time } from '../lib/fmt';
 import { stopFlow, withConflicts } from '../lib/flows';
+import { startTimerOfflineAware, stopTimerOfflineAware } from '../lib/offline';
 import { t } from '../lib/i18n';
 import { activeWorkspaceId, activeWorkspaces, settings, timer, workspaceById } from '../lib/store';
 
@@ -141,19 +142,21 @@ export function TimerScreen() {
     setBusy(true);
     try {
       if (running) {
-        const done = await stopFlow((x) => post('/timer/stop', x), running.start_at);
+        let queued = false;
+        const done = await stopFlow(async (x) => {
+          queued = (await stopTimerOfflineAware(x)) === 'queued';
+        }, running.start_at);
         if (done) timer.value = null;
+        if (queued) toast(t('offline.queued'));
       } else {
-        const r = await withConflicts((x) =>
-          post<{ entry: Entry }>('/timer/start', {
-            ...draft.refs,
-            description: draft.description,
-            ...x,
-          }),
+        const entry = await withConflicts((x) =>
+          startTimerOfflineAware({ ...draft.refs, description: draft.description, ...x }),
         );
-        if (r) {
-          timer.value = r.entry;
+        if (entry) {
+          timer.value = entry;
           setDraft({ ...draft, description: '' });
+          // Negative ids are local stand-ins queued while offline.
+          if (entry.id < 0) toast(t('offline.queued'));
         }
       }
     } catch (err) {

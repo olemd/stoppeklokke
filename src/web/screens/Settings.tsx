@@ -317,6 +317,7 @@ export function SettingsScreen() {
             class="btn plain"
             onClick={async () => {
               await post('/auth/logout').catch(showError);
+              navigator.serviceWorker?.controller?.postMessage('clear-api-cache');
               await loadAuth();
             }}
           >
@@ -335,6 +336,7 @@ export function SettingsScreen() {
               )
                 return;
               await post('/auth/logout-all').catch(showError);
+              navigator.serviceWorker?.controller?.postMessage('clear-api-cache');
               await loadAuth();
             }}
           >
