@@ -10,3 +10,4 @@ wrangler.jsonc
 coverage/
 src/shared/i18n/catalogs.generated.ts
 backup-*.sql
+.playwright-mcp/

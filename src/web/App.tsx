@@ -1,14 +1,165 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+/** App shell: auth gating, header with workspace switcher, navigation, routes. */
+import { useEffect, useState } from 'preact/hooks';
+import { DialogHost } from './components/Dialog';
 import { Footer } from './components/Footer';
-import { t } from './lib/i18n';
+import { showError, ToastHost } from './components/Toast';
+import { patch } from './lib/api';
+import { setLocale, t } from './lib/i18n';
+import { navigate, onLinkClick, route } from './lib/router';
+import {
+  activeWorkspaceId,
+  activeWorkspaces,
+  auth,
+  loadAll,
+  loadAuth,
+  multiWorkspace,
+  online,
+  settings,
+  timer,
+  viewWorkspace,
+  type Settings,
+} from './lib/store';
+import { Login, MustRegister, Setup } from './screens/Auth';
+import { CatalogScreen } from './screens/Catalog';
+import { LogScreen } from './screens/Log';
+import { SettingsScreen } from './screens/Settings';
+import { TimerScreen } from './screens/Timer';
+import { Wizard } from './screens/Wizard';
 
-export function App() {
+const NAV = [
+  { href: '/', key: 'nav.timer' },
+  { href: '/log', key: 'nav.log' },
+  { href: '/catalog', key: 'nav.catalog' },
+  { href: '/settings', key: 'nav.settings' },
+];
+
+function WorkspaceSwitcher() {
+  if (!multiWorkspace.value) return null;
+  const v = viewWorkspace.value === 'all' ? 'all' : String(activeWorkspaceId.value ?? '');
   return (
-    <>
-      <main class="main">
-        <h1>{t('app.name')}</h1>
+    <div class="ws-switch">
+      <label for="ws-switch" class="visually-hidden">
+        {t('nav.workspace')}
+      </label>
+      <select
+        id="ws-switch"
+        value={v}
+        onChange={async (e) => {
+          const val = e.currentTarget.value;
+          if (val === 'all') {
+            viewWorkspace.value = 'all';
+            return;
+          }
+          viewWorkspace.value = null;
+          try {
+            settings.value = await patch<Settings>('/settings', {
+              active_workspace_id: Number(val),
+            });
+          } catch (err) {
+            showError(err);
+          }
+        }}
+      >
+        {activeWorkspaces.value.map((w) => (
+          <option key={w.id} value={w.id}>
+            {w.name}
+          </option>
+        ))}
+        <option value="all">{t('nav.allWorkspaces')}</option>
+      </select>
+    </div>
+  );
+}
+
+function Header() {
+  const path = route.value;
+  return (
+    <header class="header">
+      <a class="brand" href="/">
+        <span class={`brand-dot ${timer.value ? 'on' : ''}`} aria-hidden="true" />
+        {t('app.name')}
+      </a>
+      <WorkspaceSwitcher />
+      <nav class="nav" aria-label={t('nav.label')}>
+        <ul>
+          {NAV.map((n) => {
+            const current = n.href === '/' ? path === '/' : path.startsWith(n.href);
+            return (
+              <li key={n.href}>
+                <a href={n.href} aria-current={current ? 'page' : undefined}>
+                  {t(n.key)}
+                </a>
+              </li>
+            );
+          })}
+        </ul>
+      </nav>
+    </header>
+  );
+}
+
+function Routes() {
+  const path = route.value;
+  if (path.startsWith('/log')) return <LogScreen />;
+  if (path.startsWith('/catalog')) return <CatalogScreen />;
+  if (path.startsWith('/settings')) return <SettingsScreen />;
+  return <TimerScreen />;
+}
+
+function Shell({ children, bare = false }: { children: preact.ComponentChildren; bare?: boolean }) {
+  return (
+    <div class="app" onClick={onLinkClick}>
+      <a class="skip" href="#main">
+        {t('app.skip')}
+      </a>
+      {!bare && <Header />}
+      {!online.value && (
+        <p class="offline-banner" role="status">
+          {t('app.offline')}
+        </p>
+      )}
+      <main id="main" class={bare ? 'main narrow' : 'main'}>
+        {children}
       </main>
       <Footer />
-    </>
+      <DialogHost />
+      <ToastHost />
+    </div>
+  );
+}
+
+export function App() {
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    loadAuth()
+      .catch(showError)
+      .finally(() => setReady(true));
+  }, []);
+
+  const a = auth.value;
+  const authed = a?.authenticated && !a.must_register;
+  useEffect(() => {
+    if (!authed) return;
+    loadAll()
+      .then(() => settings.value && setLocale(settings.value.locale))
+      .catch(showError);
+  }, [authed]);
+
+  if (!ready || !a) return <Shell bare>{<p>{t('app.loading')}</p>}</Shell>;
+  if (a.setup_required) {
+    if (route.value !== '/setup') navigate(`/setup${location.search}`, true);
+    return <Shell bare>{<Setup />}</Shell>;
+  }
+  if (!a.authenticated) return <Shell bare>{<Login />}</Shell>;
+  if (a.must_register) return <Shell bare>{<MustRegister />}</Shell>;
+  if (!settings.value) return <Shell bare>{<p>{t('app.loading')}</p>}</Shell>;
+  if (!settings.value.setup_complete) return <Shell bare>{<Wizard />}</Shell>;
+  if (route.value === '/setup') navigate('/', true);
+  return (
+    <Shell>
+      <Routes />
+    </Shell>
   );
 }

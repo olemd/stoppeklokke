@@ -10,6 +10,7 @@ import { healthModule } from './health';
 import { projectsModule } from './projects';
 import { ratesModule } from './rates';
 import { settingsModule } from './settings';
+import { suggestionsModule } from './suggestions';
 import { timerModule } from './timer';
 import type { Module } from './types';
 import { workspacesModule } from './workspaces';
@@ -24,4 +25,5 @@ export const modules: Module[] = [
   timerModule,
   entriesModule,
   ratesModule,
+  suggestionsModule,
 ];

@@ -76,7 +76,4 @@ export function settingsFromRows(rows: { key: string; value: string }[]): Settin
   return out as Settings;
 }
 
-/** Suggested currency for a locale at setup (§4.3): nb → NOK, otherwise EUR. */
-export function suggestCurrency(locale: string): string {
-  return locale.toLowerCase().startsWith('nb') ? 'NOK' : 'EUR';
-}
+export { suggestCurrency } from './suggest';
