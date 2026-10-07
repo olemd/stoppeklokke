@@ -134,8 +134,17 @@ export async function rateImpact(
 }
 
 /** The UPDATE that freezes the OLD resolved rate/currency on affected entries. */
-function lockStatement(t: Target, s: Settings, lockedAt: number, before?: number): Stmt {
-  const { where, params } = affected(t, before);
+/**
+ * Freeze the currently resolved rate and currency on the entries matched by
+ * `where` (aliases e/p/c/w as in FROM). Used by rate changes, manual rate
+ * locks and period locks; one set-based UPDATE regardless of data size.
+ */
+export function freezeRates(
+  where: string,
+  params: (number | string | null)[],
+  s: Pick<Settings, 'default_hourly_rate' | 'currency'>,
+  lockedAt: number,
+): Stmt {
   return {
     sql: `UPDATE time_entries AS t
             SET rate_locked_at = ?, locked_rate = a.r, locked_currency = a.cu, updated_at = ?
@@ -146,6 +155,11 @@ function lockStatement(t: Target, s: Settings, lockedAt: number, before?: number
            WHERE t.id = a.id`,
     params: [lockedAt, lockedAt, s.default_hourly_rate, s.currency, ...params],
   };
+}
+
+function lockStatement(t: Target, s: Settings, lockedAt: number, before?: number): Stmt {
+  const { where, params } = affected(t, before);
+  return freezeRates(where, params, s, lockedAt);
 }
 
 export interface RateChangePlan {

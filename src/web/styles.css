@@ -893,3 +893,160 @@ progress.bar.small {
     justify-content: center;
   }
 }
+
+/* ── Reports ────────────────────────────────────────────────────────── */
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1rem;
+  align-items: flex-end;
+}
+.filters .field {
+  min-width: 10rem;
+  flex: 0 1 12rem;
+}
+.table-wrap {
+  overflow-x: auto;
+}
+.report-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+.report-table th,
+.report-table td {
+  text-align: start;
+  padding: 0.5rem 0.6rem;
+  border-bottom: 1px solid var(--rule);
+}
+.report-table thead th {
+  font-size: 0.875rem;
+  color: var(--steel);
+  border-bottom: 2px solid var(--ink);
+}
+.report-table tbody th {
+  font-weight: 400;
+}
+.report-table tfoot th,
+.report-table tfoot td {
+  font-weight: 700;
+  border-bottom: 0;
+}
+.report-table .num {
+  text-align: end;
+  white-space: nowrap;
+}
+.report-table.muted {
+  color: var(--steel);
+}
+.detail-row td {
+  color: var(--steel);
+  font-size: 0.875rem;
+  padding-inline-start: 1.5rem;
+}
+.invoice-total .total-amount {
+  font-size: 1.4rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.chart {
+  margin: 0;
+}
+.chart-title {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+.chart svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+.chart-bar {
+  fill: var(--steel);
+}
+.chart-bar.is-hover {
+  fill: var(--ink);
+}
+.chart-hit {
+  fill: transparent;
+}
+.chart-axis {
+  stroke: var(--steel);
+  stroke-width: 1;
+}
+.chart-grid {
+  stroke: var(--rule);
+  stroke-width: 1;
+}
+.chart-tick {
+  fill: var(--steel);
+  font-size: 11px;
+}
+.chart-tooltip {
+  color: var(--steel);
+  font-size: 0.875rem;
+  min-height: 1.5em;
+  font-variant-numeric: tabular-nums;
+}
+
+.print-only {
+  display: none;
+}
+@media print {
+  .print-only {
+    display: initial;
+  }
+  .report-table thead th {
+    color: #000;
+  }
+}
+
+/* Log multi-select */
+.entry-row.selectable {
+  grid-template-columns: 1.5rem 0.3rem 1fr auto;
+  grid-template-areas:
+    'sel sw main dur'
+    'sel sw time act';
+}
+.entry-row .select {
+  grid-area: sel;
+  width: 1.2rem;
+  height: 1.2rem;
+  accent-color: var(--ink);
+}
+@media (min-width: 48rem) {
+  .entry-row.selectable {
+    grid-template-columns: 1.5rem 0.3rem 1fr auto 9rem 4.5rem 6rem;
+    grid-template-areas: 'sel sw main flags time dur act';
+  }
+}
+.bulk-bar {
+  position: sticky;
+  top: 0.5rem;
+  z-index: 4;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  background: var(--surface);
+  border: 1px solid var(--steel);
+  border-radius: var(--radius-s);
+  padding: 0.5rem 0.75rem;
+}
+
+a.btn {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+/* Invoice tables share column widths so projects line up. */
+.invoice .report-table {
+  table-layout: fixed;
+}
+.invoice .report-table th:first-child,
+.invoice .report-table td:first-child {
+  width: 46%;
+}

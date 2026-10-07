@@ -7,8 +7,10 @@ import { authModule } from './auth';
 import { clientsModule } from './clients';
 import { entriesModule } from './entries';
 import { healthModule } from './health';
+import { locksModule } from './locks';
 import { projectsModule } from './projects';
 import { ratesModule } from './rates';
+import { reportsModule } from './reports';
 import { settingsModule } from './settings';
 import { suggestionsModule } from './suggestions';
 import { timerModule } from './timer';
@@ -26,4 +28,6 @@ export const modules: Module[] = [
   entriesModule,
   ratesModule,
   suggestionsModule,
+  reportsModule,
+  locksModule,
 ];

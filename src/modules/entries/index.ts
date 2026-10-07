@@ -8,6 +8,7 @@ import { Entry, EntryCreate, EntryPatch, Id } from '../../shared/schemas';
 import { loadLookup } from '../data/repo';
 import { body, json } from '../http';
 import type { Module } from '../types';
+import { rateLockRoutes } from './ratelock';
 import {
   createEntry,
   deleteEntry,
@@ -45,6 +46,7 @@ export const ListQuery = z.object({
 export const entriesModule: Module = {
   name: 'entries',
   routes(app) {
+    rateLockRoutes(app);
     app.openapi(
       createRoute({
         method: 'get',

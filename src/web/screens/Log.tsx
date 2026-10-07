@@ -31,6 +31,7 @@ export function LogScreen() {
   const [entries, setEntries] = useState<Entry[] | null>(null);
   const [editing, setEditing] = useState<number | 'new' | null>(null);
   const [locks, setLocks] = useState<Map<number, string>>(new Map());
+  const [selected, setSelected] = useState<Set<number>>(new Set());
 
   const reload = async () => {
     try {
@@ -63,6 +64,25 @@ export function LogScreen() {
       setEditing(null);
       toast(t('common.saved'));
       await reload();
+    }
+  };
+
+  /** Bulk rate lock/release of the selected entries (§4.1). */
+  const bulk = async (action: 'rate-lock' | 'rate-unlock') => {
+    try {
+      const r = await post<{ locked?: number; released?: number; skipped_period_locked?: number }>(
+        `/entries/${action}`,
+        { ids: [...selected] },
+      );
+      if (action === 'rate-lock') toast(t('bulk.locked', { count: r.locked ?? 0 }));
+      else {
+        toast(t('bulk.released', { count: r.released ?? 0 }));
+        if (r.skipped_period_locked) toast(t('bulk.skipped', { count: r.skipped_period_locked }));
+      }
+      setSelected(new Set());
+      await reload();
+    } catch (err) {
+      showError(err);
     }
   };
 
@@ -122,6 +142,24 @@ export function LogScreen() {
         </button>
       </div>
       <p class="week-total">{t('log.weekTotal', { total: hm(weekTotal) })}</p>
+      {selected.size > 0 && (
+        <div
+          class="bulk-bar"
+          role="region"
+          aria-label={t('bulk.selected', { count: selected.size })}
+        >
+          <span>{t('bulk.selected', { count: selected.size })}</span>
+          <button type="button" class="btn plain small" onClick={() => bulk('rate-lock')}>
+            {t('bulk.rateLock')}
+          </button>
+          <button type="button" class="btn plain small" onClick={() => bulk('rate-unlock')}>
+            {t('bulk.rateUnlock')}
+          </button>
+          <button type="button" class="btn plain small" onClick={() => setSelected(new Set())}>
+            {t('common.cancel')}
+          </button>
+        </div>
+      )}
 
       {editing === 'new' && (
         <section class="panel" aria-label={t('log.addTitle')}>
@@ -178,7 +216,22 @@ export function LogScreen() {
                       />
                     </li>
                   ) : (
-                    <li key={e.id} class={`entry-row ${e.overlaps ? 'overlaps' : ''}`}>
+                    <li key={e.id} class={`entry-row selectable ${e.overlaps ? 'overlaps' : ''}`}>
+                      <input
+                        type="checkbox"
+                        class="select"
+                        disabled={e.end_at === null}
+                        checked={selected.has(e.id)}
+                        aria-label={t('bulk.select', {
+                          description: e.description || t('timer.untitled'),
+                        })}
+                        onChange={(ev) => {
+                          const next = new Set(selected);
+                          if (ev.currentTarget.checked) next.add(e.id);
+                          else next.delete(e.id);
+                          setSelected(next);
+                        }}
+                      />
                       <span
                         class="swatch"
                         style={{ backgroundColor: entryColor(e) ?? 'transparent' }}

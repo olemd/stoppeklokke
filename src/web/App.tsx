@@ -22,7 +22,9 @@ import {
 } from './lib/store';
 import { Login, MustRegister, Setup } from './screens/Auth';
 import { CatalogScreen } from './screens/Catalog';
+import { InvoiceScreen } from './screens/Invoice';
 import { LogScreen } from './screens/Log';
+import { ReportsScreen } from './screens/Reports';
 import { SettingsScreen } from './screens/Settings';
 import { TimerScreen } from './screens/Timer';
 import { Wizard } from './screens/Wizard';
@@ -30,6 +32,7 @@ import { Wizard } from './screens/Wizard';
 const NAV = [
   { href: '/', key: 'nav.timer' },
   { href: '/log', key: 'nav.log' },
+  { href: '/reports', key: 'nav.reports' },
   { href: '/catalog', key: 'nav.catalog' },
   { href: '/settings', key: 'nav.settings' },
 ];
@@ -102,6 +105,8 @@ function Header() {
 function Routes() {
   const path = route.value;
   if (path.startsWith('/log')) return <LogScreen />;
+  if (path.startsWith('/reports/invoice')) return <InvoiceScreen />;
+  if (path.startsWith('/reports')) return <ReportsScreen />;
   if (path.startsWith('/catalog')) return <CatalogScreen />;
   if (path.startsWith('/settings')) return <SettingsScreen />;
   return <TimerScreen />;
@@ -131,6 +136,9 @@ function Shell({ children, bare = false }: { children: preact.ComponentChildren;
 
 export function App() {
   const [ready, setReady] = useState(false);
+  // Screens read workspaces/clients on mount, so render them only once
+  // settings, catalog and timer have ALL loaded.
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
     loadAuth()
@@ -142,8 +150,10 @@ export function App() {
   const authed = a?.authenticated && !a.must_register;
   useEffect(() => {
     if (!authed) return;
+    setLoaded(false);
     loadAll()
       .then(() => settings.value && setLocale(settings.value.locale))
+      .then(() => setLoaded(true))
       .catch(showError);
   }, [authed]);
 
@@ -154,7 +164,7 @@ export function App() {
   }
   if (!a.authenticated) return <Shell bare>{<Login />}</Shell>;
   if (a.must_register) return <Shell bare>{<MustRegister />}</Shell>;
-  if (!settings.value) return <Shell bare>{<p>{t('app.loading')}</p>}</Shell>;
+  if (!settings.value || !loaded) return <Shell bare>{<p>{t('app.loading')}</p>}</Shell>;
   if (!settings.value.setup_complete) return <Shell bare>{<Wizard />}</Shell>;
   if (route.value === '/setup') navigate('/', true);
   return (
