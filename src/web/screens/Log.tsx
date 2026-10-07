@@ -15,6 +15,7 @@ import { entryColor, entryLabel, hm, rate, time } from '../lib/fmt';
 import { withConflicts } from '../lib/flows';
 import { t, translator } from '../lib/i18n';
 import { navigate, query } from '../lib/router';
+import { ESCAPE_EVENT } from '../lib/shortcuts';
 import {
   activeWorkspaceId,
   filterWorkspaceId,
@@ -29,7 +30,18 @@ export function LogScreen() {
   const week = startOfWeek(query.value.get('week') ?? today);
   const days = Array.from({ length: 7 }, (_, i) => addDays(week, i));
   const [entries, setEntries] = useState<Entry[] | null>(null);
-  const [editing, setEditing] = useState<number | 'new' | null>(null);
+  // `n` opens the add form via /log?new=1 (§7.4).
+  const [editing, setEditing] = useState<number | 'new' | null>(
+    query.value.get('new') ? 'new' : null,
+  );
+  useEffect(() => {
+    if (query.value.get('new')) setEditing('new');
+  }, [query.value]);
+  useEffect(() => {
+    const close = () => setEditing(null);
+    addEventListener(ESCAPE_EVENT, close);
+    return () => removeEventListener(ESCAPE_EVENT, close);
+  }, []);
   const [locks, setLocks] = useState<Map<number, string>>(new Map());
   const [selected, setSelected] = useState<Set<number>>(new Set());
 

@@ -9,6 +9,7 @@ import { time } from './lib/fmt';
 import { setLocale, t } from './lib/i18n';
 import { dismissFailed, failedOps, initOffline, pendingCount } from './lib/offline';
 import { navigate, onLinkClick, route } from './lib/router';
+import { installShortcuts } from './lib/shortcuts';
 import {
   activeWorkspaceId,
   activeWorkspaces,
@@ -161,6 +162,7 @@ function Shell({ children, bare = false }: { children: preact.ComponentChildren;
 
 export function App() {
   const [ready, setReady] = useState(false);
+  useEffect(installShortcuts, []);
   // Screens read workspaces/clients on mount, so render them only once
   // settings, catalog and timer have ALL loaded.
   const [loaded, setLoaded] = useState(false);
