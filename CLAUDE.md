@@ -50,4 +50,4 @@ health, auth (passkeys, sessions, recovery, rate limit), settings, workspaces, c
 - The service worker caches only an allow-list of GET endpoints (`OFFLINE_API` in `src/web/sw/sw.ts`); add an endpoint there only if it is needed offline and holds no secrets.
 - Account-level routes (tokens, webhooks, passkeys, import) use `requireSession`: API tokens must never reach them.
 - `Response.text()` strips a UTF-8 BOM; test CSV bytes with `arrayBuffer()`.
-- After `bun run format`, edit with exact strings from the reformatted file (Prettier reflows lines).
+- After `bun run format`, edit with exact strings from the reformatted file (Biome reflows lines).
