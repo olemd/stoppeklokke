@@ -123,7 +123,8 @@ describe('CSV export', () => {
         '/api/reports/export.csv?from=2026-09-01&to=2026-09-30&headers=keys&sep=;&decimal=,',
       )
     ).text();
-    expect(text.split('\r\n')[0]).toBe(
+    // workerd's text() strips the BOM, Bun's does not; compare without it.
+    expect(text.replace(/^\uFEFF/, '').split('\r\n')[0]).toBe(
       'date;start;end;duration;workspace;hours;client;project;description;billable;rate;currency;amount;locked;lock_note',
     );
   });

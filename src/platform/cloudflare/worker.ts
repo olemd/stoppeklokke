@@ -49,6 +49,8 @@ export function buildCtx(env: Env, exec: { waitUntil(p: Promise<unknown>): void 
     scheduler,
     events,
     push: pushSenderFromConfig(parsed.config, systemClock),
+    // Set by Cloudflare's edge on every request; clients cannot override it.
+    clientIp: (req) => req.headers.get('cf-connecting-ip') ?? 'unknown',
   };
   for (const m of modules) {
     const handler = m.onEvent;

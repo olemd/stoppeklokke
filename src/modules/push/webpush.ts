@@ -45,7 +45,7 @@ async function importPrivate(
   publicRaw: Bytes,
   usage: 'ECDH' | 'ECDSA',
 ): Promise<CryptoKey> {
-  const jwk: JsonWebKey = {
+  const jwk = {
     kty: 'EC',
     crv: 'P-256',
     d: toBase64Url(d),
@@ -167,7 +167,7 @@ export async function vapidAuthorization(
 export function createPushSender(
   keys: { publicKey: string; privateKey: string; subject: string },
   clock: () => number,
-  doFetch: typeof fetch = (...a) => fetch(...a),
+  doFetch: (url: string, init: RequestInit) => Promise<Response> = (url, init) => fetch(url, init),
 ): PushSender {
   return {
     async send(sub: PushSubscriptionKeys, payload: string, opts = {}) {

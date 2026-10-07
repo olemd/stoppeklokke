@@ -5,7 +5,9 @@
  * work without a rendered config (the template is fork-specific).
  */
 import { cloudflareTest, readD1Migrations } from '@cloudflare/vitest-pool-workers';
+import { resolve } from 'node:path';
 import { defineConfig } from 'vitest/config';
+import { TEST_ENV } from './test/test-env';
 
 export default defineConfig(async () => {
   const migrations = await readD1Migrations('./migrations');
@@ -18,11 +20,7 @@ export default defineConfig(async () => {
           d1Databases: ['DB'],
           bindings: {
             TEST_MIGRATIONS: migrations,
-            ORIGIN: 'https://stoppeklokke.test',
-            RP_ID: 'stoppeklokke.test',
-            SETUP_TOKEN: 'test-setup-token-0123456789',
-            APP_VERSION: '9.9.9',
-            GIT_SHA: 'testsha',
+            ...TEST_ENV,
           },
           // Mirrors wrangler.template.jsonc so asset routing is tested as deployed.
           assets: {
@@ -34,9 +32,16 @@ export default defineConfig(async () => {
         },
       }),
     ],
+    resolve: {
+      // The shared suite talks to D1 here; vitest.bun.config.ts swaps in SQLite.
+      alias: {
+        '@test/platform': resolve('test/platform/cloudflare.ts'),
+      },
+    },
     test: {
       setupFiles: ['./test/setup.ts'],
       include: ['test/**/*.test.ts'],
+      exclude: ['test/bun/**', '**/node_modules/**'],
     },
   };
 });

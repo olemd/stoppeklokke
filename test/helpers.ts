@@ -3,7 +3,6 @@
  * Test harness: calls the Hono app directly with a controllable clock, so
  * time-dependent rules (timers, sessions, locks) are deterministic.
  */
-import { env } from 'cloudflare:test';
 import { parseConfig } from '../src/core/config';
 import { randomToken, sha256Hex } from '../src/core/crypto';
 import { EventBus, type DomainEvent } from '../src/core/events';
@@ -11,10 +10,11 @@ import type { Clock, Logger, PushSender } from '../src/core/ports';
 import { createApp } from '../src/modules/app';
 import { modules } from '../src/modules';
 import type { Ctx } from '../src/modules/types';
-import { d1Db } from '../src/platform/cloudflare/d1';
+// Resolved per test platform (D1 or SQLite) by the vitest config.
+import { db, testEnv } from '@test/platform';
 
 export const ORIGIN = 'https://stoppeklokke.test';
-export const db = d1Db(env.DB);
+export { db };
 
 export class TestClock implements Clock {
   constructor(public t = 1_790_000_000) {}
@@ -49,7 +49,7 @@ export function harness(opts: { push?: PushSender | null; now?: number } = {}): 
   const pending: Promise<unknown>[] = [];
   const scheduler = { waitUntil: (p: Promise<unknown>) => void pending.push(p) };
   const bus = new EventBus(scheduler, quietLogger);
-  const parsed = parseConfig(env as unknown as Record<string, unknown>);
+  const parsed = parseConfig(testEnv);
   const ctx: Ctx = {
     db,
     config: parsed.config,
@@ -59,6 +59,8 @@ export function harness(opts: { push?: PushSender | null; now?: number } = {}): 
     scheduler,
     events: bus,
     push: opts.push ?? null,
+    // Tests simulate client IPs with this header.
+    clientIp: (req) => req.headers.get('cf-connecting-ip') ?? 'unknown',
   };
   const events: DomainEvent[] = [];
   bus.on(async (e) => void events.push(e));
@@ -111,7 +113,6 @@ export async function resetDb() {
   const tables = await db.all<{ name: string }>(
     "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' AND name NOT LIKE '_cf_%' AND name != 'd1_migrations'",
   );
-  await env.DB.exec('PRAGMA defer_foreign_keys = on');
   const order = [
     'notification_log',
     'time_entries',
@@ -125,7 +126,8 @@ export async function resetDb() {
     ...order.filter((n) => names.includes(n)),
     ...names.filter((n) => !order.includes(n)),
   ];
-  await env.DB.batch(sorted.map((n) => env.DB.prepare(`DELETE FROM "${n}"`)));
+  // FK-safe order (children first), so no deferred-constraint pragma is needed.
+  await db.batch(sorted.map((n) => ({ sql: `DELETE FROM "${n}"`, params: [] })));
 }
 
 /** A harness with a valid session (inserted directly; the auth flow has its own tests). */

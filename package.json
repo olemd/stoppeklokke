@@ -33,12 +33,12 @@
     "gen": "bun scripts/i18n-index.ts",
     "render-config": "bun scripts/render-wrangler-config.ts",
     "dev": "bun run gen && bun run render-config && bun scripts/dev.ts",
-    "build": "bun run gen && bun run build:web && bun run build:worker",
+    "build": "bun run gen && bun run build:web && bun run build:worker && bun run build:server",
     "build:web": "vite build",
     "build:worker": "bun run render-config && wrangler deploy --dry-run --outdir dist/worker",
     "test": "bun run gen && vitest run",
     "test:watch": "bun run gen && vitest",
-    "typecheck": "bun run gen && tsc -p tsconfig.app.json && tsc -p tsconfig.cf.json && tsc -p tsconfig.web.json && tsc -p tsconfig.sw.json && tsc -p tsconfig.scripts.json",
+    "typecheck": "bun run gen && tsc -p tsconfig.app.json && tsc -p tsconfig.cf.json && tsc -p tsconfig.bun.json && tsc -p tsconfig.web.json && tsc -p tsconfig.sw.json && tsc -p tsconfig.scripts.json",
     "lint": "bun run gen && biome ci . --error-on-warnings && bun scripts/check-spdx.ts",
     "format": "biome check --write .",
     "i18n:check": "bun scripts/i18n-check.ts",
@@ -48,6 +48,10 @@
     "vapid": "bun scripts/vapid.ts",
     "bootstrap": "bun scripts/bootstrap.ts",
     "reset-auth": "bun scripts/reset-auth.ts",
-    "screenshots": "bun scripts/screenshots.ts"
+    "screenshots": "bun scripts/screenshots.ts",
+    "build:server": "bun run gen && bun build src/platform/bun/server.ts --target bun --outfile dist/server/server.js",
+    "start": "bun dist/server/server.js",
+    "dev:bun": "bun run gen && bun src/platform/bun/server.ts",
+    "test:bun": "bun run gen && bun --bun vitest run -c vitest.bun.config.ts"
   }
 }

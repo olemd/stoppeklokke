@@ -78,7 +78,7 @@
       }
     },
     {
-      "includes": ["src/**", "!src/platform/cloudflare/**"],
+      "includes": ["src/**", "!src/platform/cloudflare/**", "!src/platform/bun/**"],
       "linter": {
         "rules": {
           "style": {
@@ -131,6 +131,26 @@
                 "deniedGlobals": {
                   "Bun": "Bun APIs are only allowed in scripts/."
                 }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "includes": ["src/platform/bun/**"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "patterns": [
+                  {
+                    "group": ["cloudflare:*", "@cloudflare/*"],
+                    "message": "Cloudflare APIs are only allowed in src/platform/cloudflare/ (SPEC \u00a715.4)."
+                  }
+                ]
               }
             }
           }

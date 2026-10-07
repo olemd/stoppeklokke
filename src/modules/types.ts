@@ -20,6 +20,12 @@ export interface Ctx {
   events: EventBus;
   /** null when VAPID keys are not configured. */
   push: PushSender | null;
+  /**
+   * The client's IP address for a request, as the platform knows it (used by
+   * the auth rate limit). Platform-specific: Cloudflare sets a header it
+   * controls; a self-hosted server uses the socket or a trusted proxy header.
+   */
+  clientIp(req: Request): string;
 }
 
 export type AuthInfo =

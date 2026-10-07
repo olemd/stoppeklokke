@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // Full export → import into a fresh instance gives identical reports (§9.1, §13).
-import { env } from 'cloudflare:test';
 import { beforeEach, describe, expect, it } from 'vitest';
+import { stmt } from '../src/core/ports';
 import { zonedToEpoch } from '../src/core/time/tz';
 import { HOUR, authed, call, db, resetDb, type Harness } from './helpers';
 
@@ -99,13 +99,12 @@ beforeEach(async () => {
     const s = start + i * 5 * HOUR;
     const refs = i % 3 === 0 ? [acme.id, p.id] : i % 3 === 1 ? [euro.id, null] : [null, null];
     stmts.push(
-      env.DB.prepare(
+      stmt(
         `INSERT INTO time_entries (workspace_id, client_id, project_id, description, start_at, end_at, billable, created_at, updated_at)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      ).bind(
         ws,
-        refs[0],
-        refs[1],
+        refs[0] ?? null,
+        refs[1] ?? null,
         `Task ${i % 17}`,
         s,
         s + 3000 + (i % 7) * 600,
@@ -115,7 +114,7 @@ beforeEach(async () => {
       ),
     );
   }
-  await env.DB.batch(stmts);
+  await db.batch(stmts);
   await call(
     h,
     'POST',
