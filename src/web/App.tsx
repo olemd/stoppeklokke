@@ -139,6 +139,8 @@ function SyncStatus() {
 
 function Shell({ children, bare = false }: { children: preact.ComponentChildren; bare?: boolean }) {
   return (
+    // biome-ignore lint/a11y/useKeyWithClickEvents: delegated handler for <a> clicks; links are keyboard-activated natively and their click events bubble here.
+    // biome-ignore lint/a11y/noStaticElementInteractions: see above, this only intercepts same-origin link navigation.
     <div class="app" onClick={onLinkClick}>
       <a class="skip" href="#main">
         {t('app.skip')}

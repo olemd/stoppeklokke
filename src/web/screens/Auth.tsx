@@ -123,7 +123,7 @@ export function Setup() {
               {error}
             </p>
           )}
-          <button class="btn primary" disabled={busy}>
+          <button type="submit" class="btn primary" disabled={busy}>
             {t('auth.registerPasskey')}
           </button>
         </form>
@@ -188,7 +188,7 @@ export function Login() {
               required
             />
           </div>
-          <button class="btn plain" disabled={busy}>
+          <button type="submit" class="btn plain" disabled={busy}>
             {t('auth.recoveryLogin')}
           </button>
         </form>

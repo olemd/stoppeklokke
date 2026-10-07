@@ -210,7 +210,7 @@ function routes(app: Router) {
       const ctx = c.env.ctx;
       const { response, label, setup_token } = c.req.valid('json');
       const mode = await registrationMode(c, setup_token);
-      let verification;
+      let verification: Awaited<ReturnType<typeof verifyRegistrationResponse>>;
       try {
         verification = await verifyRegistrationResponse({
           response: response as unknown as RegistrationResponseJSON,
@@ -320,7 +320,7 @@ function routes(app: Router) {
         String(response.id),
       );
       if (!pk) throw new HttpError(401, 'unknown_passkey', 'This passkey is not registered here');
-      let verification;
+      let verification: Awaited<ReturnType<typeof verifyAuthenticationResponse>>;
       try {
         verification = await verifyAuthenticationResponse({
           response,

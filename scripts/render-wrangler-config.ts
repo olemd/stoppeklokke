@@ -62,7 +62,7 @@ if (domain) config.routes = [{ pattern: domain, custom_domain: true }];
 
 const header =
   '// GENERATED from wrangler.template.jsonc by scripts/render-wrangler-config.ts. Do not edit or commit.\n';
-await Bun.write(join(root, 'wrangler.jsonc'), header + JSON.stringify(config, null, 2) + '\n');
+await Bun.write(join(root, 'wrangler.jsonc'), `${header + JSON.stringify(config, null, 2)}\n`);
 console.log(
   `wrangler.jsonc rendered (worker ${values.WORKER_NAME}, origin ${values.ORIGIN}${domain ? `, domain ${domain}` : ''})`,
 );

@@ -96,9 +96,9 @@ const ws = [
     daily_target_min: null,
   },
 ];
-ws.forEach((w, i) =>
-  insert('workspaces', { ...w, sort_order: i, created_at: now, updated_at: now }),
-);
+for (const [i, w] of ws.entries()) {
+  insert('workspaces', { ...w, sort_order: i, created_at: now, updated_at: now });
+}
 
 const clients = [
   { id: 1, workspace_id: 1, name: 'Acme AS', hourly_rate: 120000, currency: null },
@@ -106,7 +106,7 @@ const clients = [
   { id: 3, workspace_id: 1, name: 'Euro GmbH', hourly_rate: 11000, currency: 'EUR' },
   { id: 4, workspace_id: 3, name: 'Housing co-op', hourly_rate: 80000, currency: null },
 ];
-clients.forEach((c) => insert('clients', { ...c, created_at: now, updated_at: now }));
+for (const c of clients) insert('clients', { ...c, created_at: now, updated_at: now });
 
 const projects = [
   { id: 1, workspace_id: 1, client_id: 1, name: 'Website', color: '#4f7cff', hourly_rate: null },
@@ -152,9 +152,9 @@ const projects = [
     hourly_rate: null,
   },
 ];
-projects.forEach((p) =>
-  insert('projects', { ...p, currency: null, created_at: now, updated_at: now }),
-);
+for (const p of projects) {
+  insert('projects', { ...p, currency: null, created_at: now, updated_at: now });
+}
 
 const work: Record<number, string[]> = {
   1: ['Landing page copy', 'Fix navigation on mobile', 'Content migration', 'Review with client'],
@@ -213,7 +213,7 @@ for (let i = 42; i >= 1; i--) {
 const dir = mkdtempSync(join(tmpdir(), 'stoppeklokke-seed-'));
 try {
   const file = join(dir, 'seed.sql');
-  writeFileSync(file, sql.join('\n') + '\n');
+  writeFileSync(file, `${sql.join('\n')}\n`);
   if (!force) {
     const out = await wrangler([
       'd1',

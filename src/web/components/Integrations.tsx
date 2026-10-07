@@ -155,7 +155,9 @@ export function TokenSettings() {
           />
         </div>
         <div class="actions start">
-          <button class="btn plain">{t('tokens.create')}</button>
+          <button type="submit" class="btn plain">
+            {t('tokens.create')}
+          </button>
         </div>
       </form>
     </section>
@@ -287,7 +289,7 @@ export function WebhookSettings() {
           </div>
         </fieldset>
         <div class="actions start">
-          <button class="btn plain" disabled={events.length === 0}>
+          <button type="submit" class="btn plain" disabled={events.length === 0}>
             {t('webhooks.create')}
           </button>
         </div>

@@ -214,7 +214,9 @@ function ClientEditor({
         <button type="button" class="btn plain" onClick={onDone}>
           {t('common.cancel')}
         </button>
-        <button class="btn primary">{t('common.save')}</button>
+        <button type="submit" class="btn primary">
+          {t('common.save')}
+        </button>
       </div>
     </form>
   );
@@ -374,7 +376,9 @@ function ProjectEditor({
         <button type="button" class="btn plain" onClick={onDone}>
           {t('common.cancel')}
         </button>
-        <button class="btn primary">{t('common.save')}</button>
+        <button type="submit" class="btn primary">
+          {t('common.save')}
+        </button>
       </div>
     </form>
   );
@@ -470,7 +474,9 @@ function WorkspaceEditor({ workspace, onDone }: { workspace?: Workspace; onDone:
         <button type="button" class="btn plain" onClick={onDone}>
           {t('common.cancel')}
         </button>
-        <button class="btn primary">{t('common.save')}</button>
+        <button type="submit" class="btn primary">
+          {t('common.save')}
+        </button>
       </div>
     </form>
   );

@@ -140,7 +140,7 @@ export function Wizard() {
             </label>
           ))}
         </fieldset>
-        <button class="btn primary" disabled={busy}>
+        <button type="submit" class="btn primary" disabled={busy}>
           {t('wizard.finish')}
         </button>
       </form>

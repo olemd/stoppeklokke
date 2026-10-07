@@ -107,11 +107,7 @@ function detailedRow(r: ReportEntry) {
   };
 }
 
-function csvFormat(
-  c: Context<AppEnv>,
-  q: { sep?: string; decimal?: string },
-  locale: string,
-): CsvFormat {
+function csvFormat(q: { sep?: string; decimal?: string }, locale: string): CsvFormat {
   const f = csvFormatFor(locale);
   return {
     sep: q.sep === 'tab' ? '\t' : ((q.sep as CsvFormat['sep']) ?? f.sep),
@@ -241,7 +237,7 @@ export const reportsModule: Module = {
       if (!parsed.success) throw badRequest('validation', parsed.error.issues[0]?.message);
       const q = parsed.data;
       const data = await loadReport(c.env.ctx, q);
-      const f = csvFormat(c, q, data.lookup.settings.locale);
+      const f = csvFormat(q, data.lookup.settings.locale);
       return csvResponse(
         c,
         `stoppeklokke-${q.from}-${q.to}.csv`,
@@ -287,7 +283,7 @@ export const reportsModule: Module = {
       const q = parsed.data;
       const data = await loadReport(c.env.ctx, { ...q, billable: 'all', project_id: undefined });
       if (q.detailed === '1') {
-        const f = csvFormat(c, q, data.lookup.settings.locale);
+        const f = csvFormat(q, data.lookup.settings.locale);
         return csvResponse(
           c,
           `invoice-basis-${q.from}-${q.to}.csv`,
@@ -296,7 +292,7 @@ export const reportsModule: Module = {
       }
       const { lookup } = data;
       const t = createTranslator(lookup.settings.locale, catalogs).t;
-      const f = csvFormat(c, q, lookup.settings.locale);
+      const f = csvFormat(q, lookup.settings.locale);
       const keys = q.headers === 'keys';
       const cols = [
         'project',

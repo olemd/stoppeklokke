@@ -62,6 +62,7 @@ export function DayChart({ days }: { days: { date: string; seconds: number }[] }
               ? ''
               : `M${x},${plotH}V${top + r}Q${x},${top} ${x + r},${top}H${x + barW - r}Q${x + barW},${top} ${x + barW},${top + r}V${plotH}Z`;
           return (
+            // biome-ignore lint/a11y/noStaticElementInteractions: pointer-only hover tooltip; the summary table below is the accessible view of the same data.
             <g key={d.date} onMouseEnter={() => setHover(i)}>
               <rect class="chart-hit" x={PAD_L + i * slot} y={0} width={slot} height={plotH} />
               {path && <path class={`chart-bar ${hover === i ? 'is-hover' : ''}`} d={path} />}

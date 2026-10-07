@@ -174,6 +174,7 @@ export function ProjectPicker({
         <div id={listId} role="listbox" class="listbox" aria-label={label}>
           {flat.length === 0 && <div class="listbox-empty">{t('timer.noMatches')}</div>}
           {groups.map((g) => (
+            // biome-ignore lint/a11y/useSemanticElements: role="group" inside a listbox (ARIA 1.2); a <fieldset> is not valid there.
             <div
               role="group"
               key={g.workspace.id}
@@ -185,6 +186,8 @@ export function ProjectPicker({
                 </div>
               )}
               {g.options.map((o) => (
+                // biome-ignore lint/a11y/useFocusableInteractive: ARIA 1.2 combobox: options are not focusable; the keyboard stays in the input and moves aria-activedescendant.
+                // biome-ignore lint/a11y/useKeyWithClickEvents: ARIA 1.2 combobox: options are not focusable; the keyboard stays in the input and moves aria-activedescendant.
                 <div
                   key={o.key}
                   id={`${id}-${o.key}`}

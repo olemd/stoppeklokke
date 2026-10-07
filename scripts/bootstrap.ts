@@ -31,7 +31,7 @@ if (accounts.length === 0)
   throw new Error('No Cloudflare account found. Run `bunx wrangler login`.');
 let accountId = accounts[0]!.id;
 if (accounts.length > 1) {
-  accounts.forEach((a, i) => console.log(`  ${i + 1}) ${a.name} (${a.id})`));
+  for (const [i, a] of accounts.entries()) console.log(`  ${i + 1}) ${a.name} (${a.id})`);
   accountId = accounts[Number(ask('Which account?', '1')) - 1]!.id;
 }
 process.env.CLOUDFLARE_ACCOUNT_ID = accountId;
@@ -72,9 +72,9 @@ const vars = {
 };
 writeFileSync(
   join(root, '.env'),
-  Object.entries(vars)
+  `${Object.entries(vars)
     .map(([k, v]) => `${k}=${v}`)
-    .join('\n') + `\nCLOUDFLARE_ACCOUNT_ID=${accountId}\n`,
+    .join('\n')}\nCLOUDFLARE_ACCOUNT_ID=${accountId}\n`,
 );
 Object.assign(process.env, vars);
 

@@ -12,7 +12,7 @@ import type {
   ProjectRow,
   WorkspaceRow,
 } from '../../core/model';
-import type { Stmt } from '../../core/ports';
+import type { BatchResult, Stmt } from '../../core/ports';
 import { resolveEntryRate, type RateLookup } from '../../core/rates/resolve';
 import type { Settings } from '../../core/settings/defs';
 import { resolveSetting } from '../../core/settings/resolve';
@@ -413,7 +413,7 @@ export async function startTimer(
       now,
     ],
   });
-  let results;
+  let results: BatchResult[];
   try {
     results = await ctx.db.batch(stmts);
   } catch (err) {

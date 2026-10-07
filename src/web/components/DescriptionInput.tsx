@@ -115,9 +115,11 @@ export function DescriptionInput({
         }}
       />
       {showList && (
-        <ul id={listId} role="listbox" class="listbox" aria-label={label}>
+        <div id={listId} role="listbox" class="listbox" aria-label={label}>
           {items.map((s, i) => (
-            <li
+            // biome-ignore lint/a11y/useFocusableInteractive: ARIA 1.2 combobox: options are not focusable; the keyboard stays in the input and moves aria-activedescendant.
+            // biome-ignore lint/a11y/useKeyWithClickEvents: ARIA 1.2 combobox: options are not focusable; the keyboard stays in the input and moves aria-activedescendant.
+            <div
               key={s.description}
               id={`${id}-${i}`}
               role="option"
@@ -127,9 +129,9 @@ export function DescriptionInput({
               onClick={() => pick(s)}
             >
               {s.description}
-            </li>
+            </div>
           ))}
-        </ul>
+        </div>
       )}
     </div>
   );

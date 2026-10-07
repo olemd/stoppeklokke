@@ -1,5 +1,6 @@
 <!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="t">
+  <title id="t">Stoppeklokke</title>
   <rect width="512" height="512" rx="112" fill="#14181f"/>
   <rect x="226" y="58" width="60" height="40" rx="10" fill="#f7f8fa"/>
   <rect x="244" y="92" width="24" height="28" fill="#f7f8fa"/>

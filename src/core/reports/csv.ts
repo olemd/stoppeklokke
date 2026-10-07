@@ -33,7 +33,7 @@ export function csvCell(v: string | number | null | undefined, f: CsvFormat): st
 }
 
 export function csvLine(cells: (string | number | null | undefined)[], f: CsvFormat): string {
-  return cells.map((c) => csvCell(c, f)).join(f.sep) + '\r\n';
+  return `${cells.map((c) => csvCell(c, f)).join(f.sep)}\r\n`;
 }
 
 /** Minor units → major-unit decimal string with fixed digits ("1200.00"). */

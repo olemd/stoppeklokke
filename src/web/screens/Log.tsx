@@ -155,11 +155,7 @@ export function LogScreen() {
       </div>
       <p class="week-total">{t('log.weekTotal', { total: hm(weekTotal) })}</p>
       {selected.size > 0 && (
-        <div
-          class="bulk-bar"
-          role="region"
-          aria-label={t('bulk.selected', { count: selected.size })}
-        >
+        <section class="bulk-bar" aria-label={t('bulk.selected', { count: selected.size })}>
           <span>{t('bulk.selected', { count: selected.size })}</span>
           <button type="button" class="btn plain small" onClick={() => bulk('rate-lock')}>
             {t('bulk.rateLock')}
@@ -170,7 +166,7 @@ export function LogScreen() {
           <button type="button" class="btn plain small" onClick={() => setSelected(new Set())}>
             {t('common.cancel')}
           </button>
-        </div>
+        </section>
       )}
 
       {editing === 'new' && (

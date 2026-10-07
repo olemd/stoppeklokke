@@ -53,7 +53,11 @@ export function DialogHost() {
   useEffect(() => {
     const d = ref.current;
     if (!d) return;
-    if (p && !d.open) d.showModal();
+    if (p && !d.open) {
+      d.showModal();
+      // Focus the primary action (the last choice; Cancel comes first).
+      d.querySelector<HTMLButtonElement>('.actions button:last-child')?.focus();
+    }
     if (!p && d.open) d.close();
   }, [p]);
 
@@ -82,7 +86,6 @@ export function DialogHost() {
                 key={i}
                 type="button"
                 class={`btn ${c.variant ?? 'plain'}`}
-                autoFocus={i === p.choices.length - 1}
                 onClick={() => finish(c.value)}
               >
                 {c.label}

@@ -198,7 +198,7 @@ export function EntryForm({
         <button type="button" class="btn plain" onClick={onCancel}>
           {t('common.cancel')}
         </button>
-        <button class="btn primary" disabled={busy}>
+        <button type="submit" class="btn primary" disabled={busy}>
           {t('common.save')}
         </button>
       </div>

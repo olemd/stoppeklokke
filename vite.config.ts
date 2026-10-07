@@ -28,7 +28,7 @@ function serviceWorker(): Plugin {
     apply: 'build',
     generateBundle(_opts, bundle) {
       const sw = bundle['sw.js'];
-      if (!sw || sw.type !== 'chunk') this.error('sw.js chunk missing');
+      if (sw?.type !== 'chunk') this.error('sw.js chunk missing');
       const emitted = Object.keys(bundle).filter(
         (f) => f !== 'sw.js' && f !== 'index.html' && !f.endsWith('.map') && f !== '_headers',
       );

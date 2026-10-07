@@ -1,6 +1,7 @@
 <!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
 <!-- Maskable: full-bleed background, artwork inside the 80% safe zone. -->
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="t">
+  <title id="t">Stoppeklokke</title>
   <rect width="512" height="512" fill="#14181f"/>
   <g transform="translate(256 266) scale(0.72) translate(-256 -290)">
     <rect x="226" y="58" width="60" height="40" rx="10" fill="#f7f8fa"/>
