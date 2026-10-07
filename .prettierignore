@@ -1,0 +1,11 @@
+node_modules
+dist
+.wrangler
+bun.lock
+CHANGELOG.md
+LICENSE
+src/shared/i18n/catalogs.generated.ts
+.remember
+.remember
+.no-bun-test
+SPEC.md

@@ -1,0 +1,10 @@
+{
+  "_meta": { "name": "Norsk bokmål", "englishName": "Norwegian Bokmål", "dir": "ltr" },
+  "app": {
+    "name": "Stoppeklokke",
+    "footer": "Stoppeklokke v{version}",
+    "source": "Kildekode (AGPL-3.0)",
+    "loading": "Laster …",
+    "offline": "Du er frakoblet. Viser sist kjente tilstand."
+  }
+}

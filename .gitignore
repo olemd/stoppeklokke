@@ -1,0 +1,12 @@
+node_modules/
+dist/
+.wrangler/
+wrangler.jsonc
+.dev.vars
+.env
+.env.*
+!.env.example
+*.log
+coverage/
+src/shared/i18n/catalogs.generated.ts
+backup-*.sql

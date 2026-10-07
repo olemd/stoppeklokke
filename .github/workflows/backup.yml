@@ -1,0 +1,56 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Weekly D1 export kept as an Actions artifact for 90 days (§11): a copy of the
+# data outside Cloudflare. Forks that consider their time data sensitive should
+# keep the repo private or disable this workflow (artifacts of public repos are
+# only downloadable by users with repo access, but still).
+name: Backup
+
+on:
+  schedule:
+    - cron: '17 3 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      ORIGIN: ${{ vars.ORIGIN }}
+      RP_ID: ${{ vars.RP_ID }}
+      D1_DATABASE_ID: ${{ vars.D1_DATABASE_ID }}
+      WORKER_NAME: ${{ vars.WORKER_NAME }}
+    steps:
+      - name: Check Cloudflare configuration
+        id: check
+        run: |
+          if [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$D1_DATABASE_ID" ]; then
+            echo "::notice title=Backup skipped::Cloudflare is not configured for this repository."
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          fi
+      - uses: actions/checkout@v7
+        if: steps.check.outputs.enabled == 'true'
+      - uses: oven-sh/setup-bun@v2
+        if: steps.check.outputs.enabled == 'true'
+        with:
+          bun-version-file: package.json
+      - uses: actions/setup-node@v7
+        if: steps.check.outputs.enabled == 'true'
+        with:
+          node-version: 24
+      - if: steps.check.outputs.enabled == 'true'
+        run: bun install --frozen-lockfile && bun run render-config
+      - name: Export D1
+        if: steps.check.outputs.enabled == 'true'
+        run: bunx wrangler d1 export DB --remote --output "backup-$(date -u +%Y-%m-%d).sql"
+      - uses: actions/upload-artifact@v7
+        if: steps.check.outputs.enabled == 'true'
+        with:
+          name: d1-backup
+          path: backup-*.sql
+          retention-days: 90

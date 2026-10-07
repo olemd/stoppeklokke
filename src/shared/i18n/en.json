@@ -1,0 +1,10 @@
+{
+  "_meta": { "name": "English", "englishName": "English", "dir": "ltr" },
+  "app": {
+    "name": "Stoppeklokke",
+    "footer": "Stoppeklokke v{version}",
+    "source": "Source code (AGPL-3.0)",
+    "loading": "Loading…",
+    "offline": "You are offline. Showing the last known state."
+  }
+}
