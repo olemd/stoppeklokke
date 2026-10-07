@@ -185,4 +185,4 @@ The operator can also run the weekly encrypted D1 backup in GitHub Actions (see 
 
 - **Lost one device**: log in on another and delete its passkey under Settings.
 - **Lost all passkeys**: use a recovery code (**Log in → Use a recovery code**). You are asked to register a new passkey straight away.
-- **Lost the recovery codes too**: whoever runs the instance can run `bun run reset-auth`, set a new setup token and use `/setup` again. Your time data is not touched.
+- **Lost the recovery codes too**: whoever runs the instance can run `bun run reset-auth` (Cloudflare) or the reset command in [Self-hosting → Operations](self-hosting.md#operations), set a new setup token and use `/setup` again. Your time data is not touched.

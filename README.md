@@ -6,7 +6,7 @@ English and Norwegian Bokmål; adding a language is one JSON file.
 
 ![The timer running on a project, with today's entries](docs/screenshots/03-timer-running.png)
 
-**[User guide](docs/user-guide.md)** · [Contributing](CONTRIBUTING.md) · [Security](SECURITY.md) · [Specification](SPEC.md)
+**[User guide](docs/user-guide.md)** · [Self-hosting](docs/self-hosting.md) · [Contributing](CONTRIBUTING.md) · [Security](SECURITY.md) · [Specification](SPEC.md)
 
 ## Single-user by design
 
@@ -27,9 +27,16 @@ One person per instance. If several people want Stoppeklokke, each deploys their
 
 ## Deploy your own
 
+Two ways to run it, from the same code:
+
+- **On Cloudflare** (below): free, nothing to operate, deploys on every push to `main`.
+- **On your own server** without Cloudflare: one Bun process with SQLite, as a Podman container or a systemd service behind Caddy. See **[docs/self-hosting.md](docs/self-hosting.md)**. Each release publishes the image `ghcr.io/olemd/stoppeklokke`.
+
+### On Cloudflare
+
 You need a Cloudflare account (the free plan is enough), [Bun](https://bun.sh) (version pinned in `package.json`) and Node.js ≥ 20 (wrangler runs on Node). A custom domain is optional; without one the app runs on `*.workers.dev`.
 
-### 1. Fork and bootstrap
+#### 1. Fork and bootstrap
 
 ```sh
 git clone https://github.com/<you>/stoppeklokke && cd stoppeklokke
@@ -48,7 +55,7 @@ bun run bootstrap
 
 Open the setup link and register your first passkey. The [user guide](docs/user-guide.md#first-time-setup) walks through the rest.
 
-### 2. Continuous deployment from GitHub
+#### 2. Continuous deployment from GitHub
 
 Every push to `main` runs CI (lint, typecheck, i18n check, tests in the Workers runtime, build, licence check). When CI is green, `deploy.yml` applies D1 migrations, deploys, and smoke-tests `/api/health` for the deployed git SHA. Set these in **Settings → Secrets and variables → Actions**:
 
@@ -68,7 +75,7 @@ Without `CLOUDFLARE_API_TOKEN` the deploy and backup workflows skip with a notic
 
 The release workflow (release-please) needs **Settings → Actions → General → Allow GitHub Actions to create and approve pull requests**.
 
-### Notes
+#### Notes
 
 - **Custom domain**: a Workers custom domain requires the domain's DNS zone to be on Cloudflare. Otherwise use the `*.workers.dev` address as `ORIGIN`.
 - **Passkeys are bound to the domain** (`RP_ID`). Moving to another domain means registering passkeys again: export your data, deploy on the new domain, run `bun run reset-auth`, set a new `SETUP_TOKEN`, visit `/setup`, and import.
@@ -94,6 +101,8 @@ cp .dev.vars.example .dev.vars
 bun run dev            # http://localhost:8787 (local D1, passkeys work on localhost)
 bun run seed           # demo data
 bun run test           # vitest in the Workers runtime — never `bun test`
+bun run test:bun       # the same suite against the self-hosted platform (SQLite on Bun)
+bun run dev:bun        # the self-hosted server locally (after `bun run build:web`)
 bun run lint && bun run typecheck && bun run i18n:check && bun run build
 bun run screenshots    # regenerate docs/screenshots (needs `bun run dev`)
 ```

@@ -6,20 +6,22 @@ Read `SPEC.md` first; it is the source of truth for behaviour. This file records
 
 - `bun install` — never npm/yarn/pnpm. Lockfile `bun.lock` is committed.
 - `bun run test` — vitest inside the Workers runtime. **Never `bun test`** (Bun's own runner bypasses the Workers pool; `bunfig.toml` points it at an empty dir).
+- `bun run test:bun` — the same integration suite against the self-hosted platform (SQLite via bun:sqlite), vitest running on Bun; plus Bun-only tests in `test/bun/`. Both suites must pass.
 - `bun run lint` — Biome (lint + format check, warnings fail) + SPDX header check. `bun run format` applies Biome's formatting and safe fixes.
-- `bun run typecheck` — tsc for every tsconfig (app, cf, web, sw, scripts).
+- `bun run typecheck` — tsc for every tsconfig (app, cf, bun, web, sw, scripts).
 - `bun run i18n:check`, `bun run build`, `bun run licenses`.
 - `bun run dev` (local D1 on :8787), `bun run seed [-- --force]` (deterministic demo data), `bun run screenshots` (regenerates docs/screenshots; needs the dev server and Playwright's Chromium: `node node_modules/playwright/cli.js install chromium`), `bun scripts/icons.ts` (PWA icons from SVG).
-- Before committing: lint, typecheck, i18n:check, test, build must all pass.
+- Before committing: lint, typecheck, i18n:check, test, test:bun, build must all pass.
 
 ## Layout and boundaries
 
 - `src/core/` — pure domain logic. No Hono, no Cloudflare. Unit-testable.
 - `src/modules/<name>/` — features (§15). Each exports a `Module` and is listed in `src/modules/index.ts`. Routes mount at `/api/<name>` unless `mountPath` is set.
+- `src/platform/bun/` — the self-hosted platform (docs/self-hosting.md): SQLite `Db` adapter, migration runner, static files from the same `_headers`, `Bun.serve`, cron. Bun APIs are allowed here; Cloudflare APIs are not. `bun run build:server` → `dist/server/server.js`; `Containerfile` + `deploy/` for Podman/Caddy.
 - `src/platform/cloudflare/` — the **only** place allowed to use Cloudflare APIs/types (Biome `noRestrictedImports`/`noRestrictedGlobals` overrides in `biome.json`; `tsconfig.app.json` has no workers types, so stray usage fails typecheck).
 - `src/shared/` — zod schemas and i18n JSON shared by Worker and web.
 - `src/web/` — Preact PWA; `src/web/sw/` is the service worker (separate tsconfig).
-- `scripts/` — operator scripts, run with `bun scripts/x.ts`. Bun APIs allowed **only** here.
+- `scripts/` — operator scripts, run with `bun scripts/x.ts`. Bun APIs allowed **only** here and in `src/platform/bun/`.
 
 ## Rules
 
@@ -49,5 +51,8 @@ health, auth (passkeys, sessions, recovery, rate limit), settings, workspaces, c
 - `/assets/*` runs through the Worker so a missing hashed file is a 404, not the SPA's index.html cached as immutable.
 - The service worker caches only an allow-list of GET endpoints (`OFFLINE_API` in `src/web/sw/sw.ts`); add an endpoint there only if it is needed offline and holds no secrets.
 - Account-level routes (tokens, webhooks, passkeys, import) use `requireSession`: API tokens must never reach them.
-- `Response.text()` strips a UTF-8 BOM; test CSV bytes with `arrayBuffer()`.
+- Platform-specific behaviour goes through `Ctx` (e.g. `ctx.clientIp(req)`), never by reading platform headers in modules. Tests get their database from the `@test/platform` alias (`test/platform/{cloudflare,bun}.ts`); keep shared tests platform-neutral and put platform-only tests in `test/cloudflare/` or `test/bun/`.
+- Self-hosted client IPs: `X-Forwarded-For` is only believed from `TRUSTED_PROXIES` (right-most untrusted hop). Never trust it unconditionally — that bypasses the auth rate limit.
+- Under Bun, vitest needs `deps.interopDefault: false` (zod's re-exported namespace).
+- Test CSV bytes with `arrayBuffer()`: `Response.text()` strips a UTF-8 BOM on workerd but not on Bun.
 - After `bun run format`, edit with exact strings from the reformatted file (Biome reflows lines).
