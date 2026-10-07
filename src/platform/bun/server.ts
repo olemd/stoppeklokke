@@ -10,7 +10,7 @@
 import { mkdirSync } from 'node:fs';
 import { dirname } from 'node:path';
 import { consoleLogger } from '../../core/ports';
-import { clientIpFrom, readServerEnv } from './env';
+import { clientIpFrom, inCidrs, readServerEnv } from './env';
 import { applyMigrations } from './migrate';
 import { createRuntime } from './runtime';
 import { openDatabase } from './sqlite';
@@ -30,23 +30,26 @@ const runtime = createRuntime({ sqlite, env, staticDir: server.staticDir, log })
 if (runtime.configErrors.length)
   log.warn('configuration problems', { errors: runtime.configErrors });
 
-// Behind a proxy without TRUSTED_PROXIES every client shares the proxy's
-// address, so one burst of failed logins would lock the owner out: say so once.
+// Behind a proxy that is not in TRUSTED_PROXIES every client shares the
+// proxy's address, so one burst of failed logins would lock the owner out.
+// Say so once, with the address to add (it depends on the network setup).
 let warnedProxy = false;
 const http = Bun.serve({
   port: server.port,
   hostname: server.host,
   fetch(req, srv) {
-    if (!warnedProxy && !server.trustedProxies.length && req.headers.has('x-forwarded-for')) {
+    const peer = srv.requestIP(req)?.address;
+    if (
+      !warnedProxy &&
+      req.headers.has('x-forwarded-for') &&
+      !(peer && inCidrs(peer, server.trustedProxies))
+    ) {
       warnedProxy = true;
-      log.warn(
-        'requests carry X-Forwarded-For but TRUSTED_PROXIES is empty; set it to your proxy address (docs/self-hosting.md)',
-      );
+      log.warn('X-Forwarded-For from an untrusted address; add your proxy to TRUSTED_PROXIES', {
+        proxy_address: peer,
+      });
     }
-    return runtime.fetch(
-      req,
-      clientIpFrom(req, srv.requestIP(req)?.address, server.trustedProxies),
-    );
+    return runtime.fetch(req, clientIpFrom(req, peer, server.trustedProxies));
   },
 });
 log.info('listening', {
