@@ -24,6 +24,7 @@
     "@types/bun": "^1.4.2",
     "eslint": "^10.12.0",
     "license-checker-rseidelsohn": "^5.0.1",
+    "playwright": "1.63.0",
     "prettier": "^3.9.9",
     "typescript": "~6.0",
     "typescript-eslint": "^8.71.1",
@@ -49,6 +50,7 @@
     "seed": "bun scripts/seed.ts",
     "vapid": "bun scripts/vapid.ts",
     "bootstrap": "bun scripts/bootstrap.ts",
-    "reset-auth": "bun scripts/reset-auth.ts"
+    "reset-auth": "bun scripts/reset-auth.ts",
+    "screenshots": "bun scripts/screenshots.ts"
   }
 }
