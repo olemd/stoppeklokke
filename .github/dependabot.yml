@@ -8,6 +8,11 @@ updates:
     groups:
       minor-and-patch:
         update-types: [minor, patch]
+    ignore:
+      # @cloudflare/vitest-pool-workers (0.22) supports only vitest ^4.1 and
+      # relies on internal Vitest APIs. Remove when the pool supports vitest 5.
+      - dependency-name: vitest
+        versions: ['>=5']
   - package-ecosystem: github-actions
     directory: /
     schedule:
