@@ -112,6 +112,7 @@ Done. Next steps:
               CLOUDFLARE_API_TOKEN=<create at https://dash.cloudflare.com/profile/api-tokens with
                 Workers Scripts:Edit, D1:Edit, Account Settings:Read, and Zone → Workers Routes:Edit
                 for your custom domain>
+              BACKUP_PASSPHRASE=<long random passphrase; the weekly backup is encrypted with it>
    Variables: ${Object.entries(vars)
      .filter(([, v]) => v)
      .map(([k, v]) => `${k}=${v}`)

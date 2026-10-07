@@ -1,8 +1,12 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 # Weekly D1 export kept as an Actions artifact for 90 days (§11): a copy of the
-# data outside Cloudflare. Forks that consider their time data sensitive should
-# keep the repo private or disable this workflow (artifacts of public repos are
-# only downloadable by users with repo access, but still).
+# data outside Cloudflare.
+#
+# The export is ENCRYPTED (gpg, AES-256) with the BACKUP_PASSPHRASE secret before
+# upload: downloading artifacts only requires read access to the repository,
+# which for a public repo means any signed-in GitHub user. Without the secret
+# the backup is skipped; a plaintext dump is never uploaded.
+# Restore: gpg --decrypt backup-YYYY-MM-DD.sql.gpg > backup.sql
 name: Backup
 
 on:
@@ -23,12 +27,16 @@ jobs:
       RP_ID: ${{ vars.RP_ID }}
       D1_DATABASE_ID: ${{ vars.D1_DATABASE_ID }}
       WORKER_NAME: ${{ vars.WORKER_NAME }}
+      BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
     steps:
       - name: Check Cloudflare configuration
         id: check
         run: |
           if [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$D1_DATABASE_ID" ]; then
             echo "::notice title=Backup skipped::Cloudflare is not configured for this repository."
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+          elif [ -z "$BACKUP_PASSPHRASE" ]; then
+            echo "::warning title=Backup skipped::Set the BACKUP_PASSPHRASE secret to enable encrypted backups."
             echo "enabled=false" >> "$GITHUB_OUTPUT"
           else
             echo "enabled=true" >> "$GITHUB_OUTPUT"
@@ -47,10 +55,16 @@ jobs:
         run: bun install --frozen-lockfile && bun run render-config
       - name: Export D1
         if: steps.check.outputs.enabled == 'true'
-        run: bunx wrangler d1 export DB --remote --output "backup-$(date -u +%Y-%m-%d).sql"
+        run: |
+          file="backup-$(date -u +%Y-%m-%d).sql"
+          bunx wrangler d1 export DB --remote --output "$file"
+          printf '%s' "$BACKUP_PASSPHRASE" | gpg --batch --yes --pinentry-mode loopback \
+            --passphrase-fd 0 --symmetric --cipher-algo AES256 --output "$file.gpg" "$file"
+          shred -u "$file"
       - uses: actions/upload-artifact@v7
         if: steps.check.outputs.enabled == 'true'
         with:
           name: d1-backup
-          path: backup-*.sql
+          path: backup-*.sql.gpg
+          if-no-files-found: error
           retention-days: 90
