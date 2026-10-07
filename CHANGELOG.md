@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.1](https://github.com/olemd/stoppeklokke/compare/stoppeklokke-v0.2.0...stoppeklokke-v0.2.1) (2026-10-07)
+
+
+### Bug Fixes
+
+* **scripts:** do not echo environment values when rendering wrangler.jsonc ([c6308c3](https://github.com/olemd/stoppeklokke/commit/c6308c38801f8cf72b46e8cd1a235f10a13c3925))
+
 ## [0.2.0](https://github.com/olemd/stoppeklokke/compare/stoppeklokke-v0.1.0...stoppeklokke-v0.2.0) (2026-10-07)
 
 
