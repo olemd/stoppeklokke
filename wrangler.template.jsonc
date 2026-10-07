@@ -15,15 +15,15 @@
     "not_found_handling": "single-page-application",
     // /assets/* goes through the Worker so a missing hashed file returns 404
     // instead of the SPA's index.html (which would be cached as immutable).
-    "run_worker_first": ["/api/*", "/assets/*"],
+    "run_worker_first": ["/api/*", "/assets/*"]
   },
   "d1_databases": [
     {
       "binding": "DB",
       "database_name": "${WORKER_NAME}",
       "database_id": "${D1_DATABASE_ID}",
-      "migrations_dir": "migrations",
-    },
+      "migrations_dir": "migrations"
+    }
   ],
   // One cron trigger for the whole app; modules hook into it (§8.1, §15.1).
   "triggers": { "crons": ["*/5 * * * *"] },
@@ -33,7 +33,7 @@
     "RP_NAME": "${RP_NAME}",
     "SOURCE_URL": "${SOURCE_URL}",
     "APP_VERSION": "${APP_VERSION}",
-    "GIT_SHA": "${GIT_SHA}",
+    "GIT_SHA": "${GIT_SHA}"
   },
-  "observability": { "enabled": true },
+  "observability": { "enabled": true }
 }
