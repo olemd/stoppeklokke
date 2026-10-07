@@ -30,11 +30,24 @@ const runtime = createRuntime({ sqlite, env, staticDir: server.staticDir, log })
 if (runtime.configErrors.length)
   log.warn('configuration problems', { errors: runtime.configErrors });
 
+// Behind a proxy without TRUSTED_PROXIES every client shares the proxy's
+// address, so one burst of failed logins would lock the owner out: say so once.
+let warnedProxy = false;
 const http = Bun.serve({
   port: server.port,
   hostname: server.host,
-  fetch: (req, srv) =>
-    runtime.fetch(req, clientIpFrom(req, srv.requestIP(req)?.address, server.trustProxy)),
+  fetch(req, srv) {
+    if (!warnedProxy && !server.trustedProxies.length && req.headers.has('x-forwarded-for')) {
+      warnedProxy = true;
+      log.warn(
+        'requests carry X-Forwarded-For but TRUSTED_PROXIES is empty; set it to your proxy address (docs/self-hosting.md)',
+      );
+    }
+    return runtime.fetch(
+      req,
+      clientIpFrom(req, srv.requestIP(req)?.address, server.trustedProxies),
+    );
+  },
 });
 log.info('listening', {
   url: `http://${http.hostname}:${http.port}`,

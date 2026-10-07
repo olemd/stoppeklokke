@@ -5,7 +5,13 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { clientIpFrom, readServerEnv } from '../../src/platform/bun/env';
+import {
+  clientIpFrom,
+  inCidrs,
+  parseCidrs,
+  parseIp,
+  readServerEnv,
+} from '../../src/platform/bun/env';
 import { applyMigrations } from '../../src/platform/bun/migrate';
 import { createRuntime } from '../../src/platform/bun/runtime';
 import { openDatabase, sqliteDb } from '../../src/platform/bun/sqlite';
@@ -85,23 +91,47 @@ describe('static files (same rules as Workers Static Assets)', () => {
 describe('client IP', () => {
   const req = (xff?: string) =>
     new Request('https://x.test/', { headers: xff ? { 'x-forwarded-for': xff } : {} });
+  const proxies = parseCidrs('127.0.0.1, 10.88.0.0/16, ::1');
 
-  it('uses the socket address unless a proxy is trusted', () => {
-    expect(clientIpFrom(req('6.6.6.6'), '10.0.0.5', false)).toBe('10.0.0.5');
+  it('uses the socket address when no proxy is trusted, whatever the headers say', () => {
+    expect(clientIpFrom(req('6.6.6.6'), '10.0.0.5', [])).toBe('10.0.0.5');
   });
 
-  it('behind a trusted proxy, takes the right-most X-Forwarded-For entry', () => {
-    // A client-supplied header is the left part; the proxy appends the real address.
-    expect(clientIpFrom(req('6.6.6.6, 203.0.113.9'), '127.0.0.1', true)).toBe('203.0.113.9');
-    expect(clientIpFrom(req(), '127.0.0.1', true)).toBe('127.0.0.1');
+  it('ignores X-Forwarded-For from a client that is not a trusted proxy', () => {
+    // Someone reaching the port directly cannot pick their own address.
+    expect(clientIpFrom(req('1.2.3.4'), '203.0.113.50', proxies)).toBe('203.0.113.50');
+  });
+
+  it('behind trusted proxies, takes the right-most untrusted hop', () => {
+    expect(clientIpFrom(req('203.0.113.9'), '10.88.0.2', proxies)).toBe('203.0.113.9');
+    // Fake entries a client prepends are to the left and never reached.
+    expect(clientIpFrom(req('6.6.6.6, 203.0.113.9'), '127.0.0.1', proxies)).toBe('203.0.113.9');
+    // Chained trusted proxies are skipped.
+    expect(clientIpFrom(req('203.0.113.9, 10.88.0.7'), '10.88.0.2', proxies)).toBe('203.0.113.9');
+    expect(clientIpFrom(req('2001:db8::5'), '::1', proxies)).toBe('2001:db8::5');
+    expect(clientIpFrom(req(), '127.0.0.1', proxies)).toBe('127.0.0.1');
+  });
+
+  it('handles IPv4-mapped IPv6 socket addresses', () => {
+    expect(clientIpFrom(req('203.0.113.9'), '::ffff:127.0.0.1', proxies)).toBe('203.0.113.9');
+  });
+
+  it('parses IPs and CIDRs, and rejects typos loudly', () => {
+    expect(inCidrs('10.88.200.1', proxies)).toBe(true);
+    expect(inCidrs('10.89.0.1', proxies)).toBe(false);
+    expect(inCidrs('2001:db8::1', parseCidrs('2001:db8::/32'))).toBe(true);
+    expect(inCidrs('2001:db9::1', parseCidrs('2001:db8::/32'))).toBe(false);
+    expect(parseIp('300.1.1.1')).toBeNull();
+    expect(parseIp('not-an-ip')).toBeNull();
+    expect(() => parseCidrs('10.0.0.0/33')).toThrow(/TRUSTED_PROXIES/);
+    expect(() => parseCidrs('localhost')).toThrow(/TRUSTED_PROXIES/);
   });
 
   it('reads server settings with safe defaults', () => {
-    expect(readServerEnv({})).toMatchObject({ port: 8787, host: '127.0.0.1', trustProxy: false });
-    expect(readServerEnv({ TRUST_PROXY: 'true', PORT: '9000' })).toMatchObject({
-      port: 9000,
-      trustProxy: true,
-    });
+    expect(readServerEnv({})).toMatchObject({ port: 8787, host: '127.0.0.1', trustedProxies: [] });
+    expect(
+      readServerEnv({ TRUSTED_PROXIES: '127.0.0.1', PORT: '9000' }).trustedProxies,
+    ).toHaveLength(1);
   });
 });
 
