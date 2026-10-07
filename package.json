@@ -16,7 +16,7 @@
     "zod": "^4.6.5"
   },
   "devDependencies": {
-    "@babel/core": "^7",
+    "@babel/core": "^8",
     "@cloudflare/vitest-pool-workers": "^0.22.0",
     "@cloudflare/workers-types": "^5.20261007.1",
     "@eslint/js": "^10.0.1",
