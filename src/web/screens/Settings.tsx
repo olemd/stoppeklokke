@@ -6,6 +6,7 @@
  */
 import { useEffect, useState } from 'preact/hooks';
 import { ROUNDING_STEPS } from '../../core/time/duration';
+import { DataSettings } from '../components/DataSettings';
 import { confirmAction } from '../components/Dialog';
 import { TokenSettings, WebhookSettings } from '../components/Integrations';
 import { PushSettings } from '../components/PushSettings';
@@ -316,6 +317,7 @@ export function SettingsScreen() {
         </button>
       </section>
 
+      <DataSettings />
       <TokenSettings />
       <WebhookSettings />
 

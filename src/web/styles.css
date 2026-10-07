@@ -1075,3 +1075,16 @@ code.secret {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
 }
+
+.file-btn {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+}
+.file-btn:focus-within {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+.file-btn.is-disabled {
+  opacity: 0.55;
+}

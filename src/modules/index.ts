@@ -6,11 +6,13 @@
 import { authModule } from './auth';
 import { clientsModule } from './clients';
 import { entriesModule } from './entries';
+import { exportModule, importModule } from './export';
 import { healthModule } from './health';
 import { locksModule } from './locks';
 import { projectsModule } from './projects';
 import { pushModule } from './push';
 import { ratesModule } from './rates';
+import { setModules } from './registry';
 import { reportsModule } from './reports';
 import { settingsModule } from './settings';
 import { suggestionsModule } from './suggestions';
@@ -36,4 +38,8 @@ export const modules: Module[] = [
   pushModule,
   tokensModule,
   webhooksModule,
+  exportModule,
+  importModule,
 ];
+
+setModules(modules);

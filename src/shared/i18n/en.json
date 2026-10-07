@@ -398,5 +398,20 @@
     "delete": "Delete",
     "deleteConfirm": "Delete this webhook?",
     "active": "Active"
+  },
+  "data": {
+    "title": "Your data",
+    "intro": "Download everything as one JSON file for backup or to move to another Stoppeklokke instance. Passkeys, sessions, push subscriptions, API tokens and webhook secrets are never included.",
+    "export": "Download export",
+    "exporting": "Exporting {collection}… {count} rows",
+    "exported": "Export downloaded ({count} rows)",
+    "import": "Import a file",
+    "importHint": "Only possible on an instance without clients, projects or time.",
+    "importing": "Importing {collection}… {done} of {total}",
+    "imported": "Import complete",
+    "invalidFile": "This is not a Stoppeklokke export file: {message}",
+    "failed": "Import failed: {message}",
+    "wipe": "Remove the partly imported data",
+    "wiped": "Partly imported data removed. You can try again."
   }
 }

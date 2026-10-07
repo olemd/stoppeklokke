@@ -398,5 +398,20 @@
     "delete": "Slett",
     "deleteConfirm": "Slette denne webhooken?",
     "active": "Aktiv"
+  },
+  "data": {
+    "title": "Dataene dine",
+    "intro": "Last ned alt som én JSON-fil, som sikkerhetskopi eller for å flytte til en annen Stoppeklokke-instans. Passnøkler, økter, push-abonnementer, API-tokens og webhook-hemmeligheter tas aldri med.",
+    "export": "Last ned eksport",
+    "exporting": "Eksporterer {collection} … {count} rader",
+    "exported": "Eksporten er lastet ned ({count} rader)",
+    "import": "Importer en fil",
+    "importHint": "Bare mulig på en instans uten kunder, prosjekter eller tid.",
+    "importing": "Importerer {collection} … {done} av {total}",
+    "imported": "Importen er fullført",
+    "invalidFile": "Dette er ikke en eksportfil fra Stoppeklokke: {message}",
+    "failed": "Importen feilet: {message}",
+    "wipe": "Fjern de delvis importerte dataene",
+    "wiped": "De delvis importerte dataene er fjernet. Du kan prøve igjen."
   }
 }
