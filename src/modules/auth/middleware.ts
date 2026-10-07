@@ -56,3 +56,15 @@ export function authenticate(publicPaths: Set<string>): MiddlewareHandler<AppEnv
     await next();
   };
 }
+
+/**
+ * Account-level actions (API tokens, webhooks, passkeys, log out everywhere)
+ * need a passkey session: an API token must never be able to mint tokens or
+ * lock the owner out.
+ */
+export const requireSession: MiddlewareHandler<AppEnv> = async (c, next) => {
+  if (c.get('auth')?.kind !== 'session') {
+    return c.json({ error: 'session_required', message: 'Log in with a passkey to do this' }, 403);
+  }
+  await next();
+};

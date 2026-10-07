@@ -362,5 +362,41 @@
     "unsupported": "This browser cannot show notifications. On iPhone and iPad, add Stoppeklokke to the home screen first, open it from there and log in inside the installed app.",
     "denied": "Notifications are blocked for this site. Allow them in the browser's site settings.",
     "notConfigured": "Push is not configured on this server (VAPID keys missing)."
+  },
+  "tokens": {
+    "title": "API tokens",
+    "intro": "For scripts, Home Assistant, Stream Deck and other tools. Send as Authorization: Bearer <token>.",
+    "name": "Name",
+    "scope": "Access",
+    "read": "Read only",
+    "write": "Read and write",
+    "expires": "Expires",
+    "never": "Never",
+    "create": "Create token",
+    "created": "Copy the token now. It is not shown again.",
+    "copy": "Copy",
+    "copied": "Copied",
+    "revoke": "Revoke",
+    "revokeConfirm": "Revoke the token “{name}”? Tools using it stop working.",
+    "none": "No tokens.",
+    "lastUsed": "Last used {date}",
+    "neverUsed": "Never used",
+    "apiDocs": "API documentation (OpenAPI)"
+  },
+  "webhooks": {
+    "title": "Webhooks",
+    "intro": "Send events to another service. Each request is signed with HMAC-SHA256 (header X-Stoppeklokke-Signature).",
+    "url": "URL (https)",
+    "events": "Events",
+    "create": "Add webhook",
+    "created": "Copy the signing secret now. It is not shown again.",
+    "none": "No webhooks.",
+    "test": "Send test",
+    "tested": "Test sent: HTTP {status}",
+    "failed": "Last delivery failed: {error}",
+    "ok": "Last delivery: HTTP {status}",
+    "delete": "Delete",
+    "deleteConfirm": "Delete this webhook?",
+    "active": "Active"
   }
 }

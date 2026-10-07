@@ -74,7 +74,7 @@ export function createApp(modules: Module[]): Router {
   });
   app.use('/api/*', originCheck);
 
-  const publicPaths = new Set<string>();
+  const publicPaths = new Set<string>(['/api/openapi.json']);
   for (const m of modules) {
     const base = m.mountPath ?? `/api/${m.name}`;
     for (const p of m.publicPaths ?? []) publicPaths.add(base + (p === '/' ? '' : p));
@@ -87,6 +87,33 @@ export function createApp(modules: Module[]): Router {
     m.routes(r);
     app.route(m.mountPath ?? `/api/${m.name}`, r);
   }
+
+  // OpenAPI 3.1 document generated from the zod route schemas (§15.3).
+  // Generating it is too heavy for every request, so it is built once per isolate.
+  app.openAPIRegistry.registerComponent('securitySchemes', 'session', {
+    type: 'apiKey',
+    in: 'cookie',
+    name: '__Host-session',
+  });
+  app.openAPIRegistry.registerComponent('securitySchemes', 'token', {
+    type: 'http',
+    scheme: 'bearer',
+    description: 'Personal API token (sk_…), created in Settings',
+  });
+  let doc: unknown = null;
+  app.get('/api/openapi.json', (c) => {
+    doc ??= app.getOpenAPI31Document({
+      openapi: '3.1.0',
+      info: {
+        title: 'Stoppeklokke API',
+        version: c.env.ctx.config.APP_VERSION,
+        license: { name: 'AGPL-3.0-or-later', url: 'https://www.gnu.org/licenses/agpl-3.0.html' },
+      },
+      servers: [{ url: c.env.ctx.config.ORIGIN }],
+      security: [{ session: [] }, { token: [] }],
+    });
+    return c.json(doc);
+  });
 
   app.notFound((c) => c.json({ error: 'not_found', message: 'Not found' }, 404));
   app.onError((err, c) => {

@@ -21,6 +21,7 @@ import type { Context } from 'hono';
 import { fromBase64Url, randomToken, timingSafeEqual } from '../../core/crypto';
 import { HttpError, badRequest, conflict, notFound } from '../../core/errors';
 import type { AppEnv, Ctx, Module, Router } from '../types';
+import { requireSession } from './middleware';
 import { checkRateLimit } from './ratelimit';
 import { RECOVERY_CODE_COUNT, generateRecoveryCode, hashRecoveryCode } from './recovery';
 import { clearSessionCookie, createSession, purgeExpired } from './session';
@@ -109,6 +110,20 @@ async function registrationMode(
 }
 
 function routes(app: Router) {
+  // Account-level actions need a passkey session, not just an API token.
+  app.use('/passkeys', requireSession);
+  app.use('/passkeys/*', requireSession);
+  app.use('/logout-all', requireSession);
+  app.use('/register/*', async (c, next) => {
+    if (c.get('auth')?.kind === 'token') {
+      return c.json(
+        { error: 'session_required', message: 'Log in with a passkey to do this' },
+        403,
+      );
+    }
+    await next();
+  });
+
   // Public: tells the UI whether to show setup, login or the app.
   app.openapi(
     createRoute({

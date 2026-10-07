@@ -362,5 +362,41 @@
     "unsupported": "Denne nettleseren kan ikke vise varsler. På iPhone og iPad må du først legge Stoppeklokke til på Hjem-skjermen, åpne den derfra og logge inn i den installerte appen.",
     "denied": "Varsler er blokkert for dette nettstedet. Tillat dem i nettleserens innstillinger for nettstedet.",
     "notConfigured": "Push er ikke satt opp på denne serveren (VAPID-nøkler mangler)."
+  },
+  "tokens": {
+    "title": "API-tokens",
+    "intro": "For skript, Home Assistant, Stream Deck og andre verktøy. Sendes som Authorization: Bearer <token>.",
+    "name": "Navn",
+    "scope": "Tilgang",
+    "read": "Bare lese",
+    "write": "Lese og skrive",
+    "expires": "Utløper",
+    "never": "Aldri",
+    "create": "Lag token",
+    "created": "Kopier tokenet nå. Det vises ikke igjen.",
+    "copy": "Kopier",
+    "copied": "Kopiert",
+    "revoke": "Tilbakekall",
+    "revokeConfirm": "Tilbakekalle tokenet «{name}»? Verktøy som bruker det, slutter å virke.",
+    "none": "Ingen tokens.",
+    "lastUsed": "Sist brukt {date}",
+    "neverUsed": "Aldri brukt",
+    "apiDocs": "API-dokumentasjon (OpenAPI)"
+  },
+  "webhooks": {
+    "title": "Webhooks",
+    "intro": "Send hendelser til en annen tjeneste. Hver forespørsel signeres med HMAC-SHA256 (headeren X-Stoppeklokke-Signature).",
+    "url": "URL (https)",
+    "events": "Hendelser",
+    "create": "Legg til webhook",
+    "created": "Kopier signeringsnøkkelen nå. Den vises ikke igjen.",
+    "none": "Ingen webhooks.",
+    "test": "Send test",
+    "tested": "Test sendt: HTTP {status}",
+    "failed": "Siste levering feilet: {error}",
+    "ok": "Siste levering: HTTP {status}",
+    "delete": "Slett",
+    "deleteConfirm": "Slette denne webhooken?",
+    "active": "Aktiv"
   }
 }

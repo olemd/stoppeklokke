@@ -15,7 +15,9 @@ import { reportsModule } from './reports';
 import { settingsModule } from './settings';
 import { suggestionsModule } from './suggestions';
 import { timerModule } from './timer';
+import { tokensModule } from './tokens';
 import type { Module } from './types';
+import { webhooksModule } from './webhooks';
 import { workspacesModule } from './workspaces';
 
 export const modules: Module[] = [
@@ -32,4 +34,6 @@ export const modules: Module[] = [
   reportsModule,
   locksModule,
   pushModule,
+  tokensModule,
+  webhooksModule,
 ];

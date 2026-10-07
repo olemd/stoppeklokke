@@ -1061,3 +1061,17 @@ a.btn {
   border-bottom: 2px solid var(--stop);
   background: var(--surface);
 }
+
+code.secret {
+  overflow-wrap: anywhere;
+  padding: 0.3rem 0.5rem;
+  background: var(--track);
+  border-radius: 4px;
+}
+.cat-row.wrap {
+  flex-wrap: wrap;
+}
+.event-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
+}
