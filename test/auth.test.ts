@@ -47,6 +47,25 @@ describe('first-time setup', () => {
     expect(r.body.error).toBe('bad_setup_token');
   });
 
+  it('rate limits setup token guessing', async () => {
+    const h = harness();
+    const headers = { 'cf-connecting-ip': '203.0.113.9' };
+    for (let i = 0; i < 10; i++) {
+      const r = await h.json('/api/auth/register/options', {
+        method: 'POST',
+        headers,
+        json: { setup_token: `guess-guess-guess-${i}` },
+      });
+      expect(r.body.error).toBe('bad_setup_token');
+    }
+    const blocked = await h.json('/api/auth/register/options', {
+      method: 'POST',
+      headers,
+      json: { setup_token: TOKEN },
+    });
+    expect(blocked.status).toBe(429);
+  });
+
   it('registers the first passkey, returns 10 recovery codes and logs in', async () => {
     const h = harness();
     const r = await setup(h, await newKey());

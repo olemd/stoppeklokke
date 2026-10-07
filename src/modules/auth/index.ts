@@ -98,6 +98,9 @@ async function registrationMode(
 ): Promise<'setup' | 'add'> {
   const ctx = c.env.ctx;
   if (c.get('auth')?.kind === 'session') return 'add';
+  // Every unauthenticated registration attempt counts towards the auth rate
+  // limit, so the setup token cannot be guessed through /register/options.
+  await checkRateLimit(c);
   if ((await passkeyCount(ctx)) > 0)
     throw new HttpError(403, 'setup_disabled', 'Setup is disabled');
   if (!setupTokenValid(ctx, setupToken))
@@ -191,7 +194,6 @@ function routes(app: Router) {
     async (c) => {
       const ctx = c.env.ctx;
       const { response, label, setup_token } = c.req.valid('json');
-      await checkRateLimit(c);
       const mode = await registrationMode(c, setup_token);
       let verification;
       try {
