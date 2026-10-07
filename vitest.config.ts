@@ -24,7 +24,13 @@ export default defineConfig(async () => {
             APP_VERSION: '9.9.9',
             GIT_SHA: 'testsha',
           },
-          assets: { directory: './test/fixtures/assets', binding: 'ASSETS' },
+          // Mirrors wrangler.template.jsonc so asset routing is tested as deployed.
+          assets: {
+            directory: './test/fixtures/assets',
+            binding: 'ASSETS',
+            run_worker_first: ['/api/*', '/assets/*'],
+            assetConfig: { not_found_handling: 'single-page-application' },
+          },
         },
       }),
     ],

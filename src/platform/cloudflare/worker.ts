@@ -21,6 +21,18 @@ export interface Env {
 
 const app = createApp(modules);
 
+/**
+ * Hashed build assets must never fall back to the SPA's index.html: _headers
+ * marks /assets/* immutable, so a stale page asking for an old hash would
+ * cache HTML under a JS/CSS URL for a year.
+ */
+export function assetOr404(res: Response): Response {
+  if (res.ok && res.headers.get('content-type')?.startsWith('text/html')) {
+    return new Response('Not found', { status: 404, headers: { 'cache-control': 'no-store' } });
+  }
+  return res;
+}
+
 // Config is parsed once per isolate; env does not change within an isolate.
 let parsed: ParsedConfig | null = null;
 
@@ -48,6 +60,7 @@ export function buildCtx(env: Env, exec: { waitUntil(p: Promise<unknown>): void 
 export default {
   async fetch(request, env, exec) {
     const url = new URL(request.url);
+    if (url.pathname.startsWith('/assets/')) return assetOr404(await env.ASSETS.fetch(request));
     if (!url.pathname.startsWith('/api/')) return env.ASSETS.fetch(request);
     return app.fetch(request, { ctx: buildCtx(env, exec) }, exec);
   },
