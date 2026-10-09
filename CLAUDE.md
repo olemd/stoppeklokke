@@ -13,6 +13,13 @@ Read `SPEC.md` first; it is the source of truth for behaviour. This file records
 - `bun run dev` (local D1 on :8787), `bun run seed [-- --force]` (deterministic demo data), `bun run screenshots` (regenerates docs/screenshots; needs the dev server and Playwright's Chromium: `node node_modules/playwright/cli.js install chromium`), `bun scripts/icons.ts` (PWA icons from SVG).
 - Before committing: lint, typecheck, i18n:check, test, test:bun, build must all pass.
 
+## Commits and releases
+
+- Every commit message is a [Conventional Commit](https://www.conventionalcommits.org/): `type(scope): summary`, e.g. `feat(reports): …`, `fix(bun): …`, `docs: …`. No `Area: summary` style.
+- release-please (`.github/workflows/release-please.yml`) runs on push to `main` only and reads these types: `feat` → minor, `fix` → patch, `feat!`/`BREAKING CHANGE:` → major. `docs`, `chore`, `build`, `ci`, `test`, `refactor` give no release. A user-visible change must be `feat` or `fix`, or it never ships in a release or the CHANGELOG.
+- Feature branches reach `main` through a PR; a push to a feature branch never releases. PRs are merged with a merge commit, so each commit message on the branch lands on `main` as written: get it right before pushing.
+- If a non-conventional commit has already reached `main`, never rewrite `main`. Put `BEGIN_COMMIT_OVERRIDE` / the corrected message(s) / `END_COMMIT_OVERRIDE` in the merged PR's body (or the next PR's), and release-please uses that instead.
+
 ## Layout and boundaries
 
 - `src/core/` — pure domain logic. No Hono, no Cloudflare. Unit-testable.
