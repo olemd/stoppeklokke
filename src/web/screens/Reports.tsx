@@ -34,7 +34,12 @@ interface Totals {
   count: number;
 }
 interface Summary {
-  groups: (Totals & { key: string; id: number | null; workspace_id: number | null })[];
+  groups: (Totals & {
+    key: string;
+    id: number | null;
+    workspace_id: number | null;
+    days?: Record<string, number>;
+  })[];
   totals: Totals;
   days: { date: string; seconds: number }[];
   has_amounts: boolean;
@@ -101,6 +106,12 @@ export function ReportsScreen() {
   const currencies = data ? Object.keys(data.totals.amounts).sort() : [];
   const showAmounts = !!data?.has_amounts && currencies.length > 0;
   const showWorkspace = multiWorkspace.value && workspaceId === null;
+  // Timesheet columns (one per day) for periods of at most a week, when the
+  // rows are workspaces/clients/projects rather than time buckets.
+  const dayCols =
+    data && data.days.length <= 7 && ['workspace', 'client', 'project'].includes(groupBy)
+      ? data.days.map((d) => d.date)
+      : [];
 
   return (
     <div class="reports stack">
@@ -222,12 +233,17 @@ export function ReportsScreen() {
         <>
           <DayChart days={data.days} />
           <div class="table-wrap">
-            <table class="report-table">
+            <table class={`report-table${dayCols.length ? ' timesheet' : ''}`}>
               <thead>
                 <tr>
                   <th scope="col">
                     {t(`reports.by${groupBy[0]!.toUpperCase()}${groupBy.slice(1)}`)}
                   </th>
+                  {dayCols.map((d) => (
+                    <th scope="col" class="num" key={d}>
+                      {formatCalendarDate(d, loc)}
+                    </th>
+                  ))}
                   <th scope="col" class="num">
                     {t('reports.hours')}
                   </th>
@@ -246,6 +262,11 @@ export function ReportsScreen() {
                 {data.groups.map((g) => (
                   <tr key={g.key}>
                     <th scope="row">{label(g)}</th>
+                    {dayCols.map((d) => (
+                      <td class="num" key={d}>
+                        {g.days?.[d] ? dur(g.days[d]) : ''}
+                      </td>
+                    ))}
                     <td class="num">{dur(g.seconds)}</td>
                     <td class="num">{dur(g.billable_seconds)}</td>
                     {showAmounts &&
@@ -260,6 +281,13 @@ export function ReportsScreen() {
               <tfoot>
                 <tr>
                   <th scope="row">{t('reports.total')}</th>
+                  {data.days
+                    .filter((d) => dayCols.includes(d.date))
+                    .map((d) => (
+                      <td class="num" key={d.date}>
+                        {d.seconds ? dur(d.seconds) : ''}
+                      </td>
+                    ))}
                   <td class="num">{dur(data.totals.seconds)}</td>
                   <td class="num">{dur(data.totals.billable_seconds)}</td>
                   {showAmounts &&

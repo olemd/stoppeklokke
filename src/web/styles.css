@@ -937,6 +937,9 @@ progress.bar.small {
   text-align: end;
   white-space: nowrap;
 }
+.report-table.timesheet tbody th {
+  min-width: 12rem;
+}
 .report-table.muted {
   color: var(--steel);
 }
