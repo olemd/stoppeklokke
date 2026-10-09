@@ -42,6 +42,12 @@ export interface Group extends Totals {
   /** Workspace/client/project id for those groupings (null = uncategorised). */
   id: number | null;
   workspace_id: number | null;
+  /**
+   * Workspace/client/project groupings only: seconds per calendar day in the
+   * range (sparse, split at midnight like `Report.days`). A piece running
+   * past midnight after the last day counts in `seconds` but in no day.
+   */
+  days?: Record<string, number>;
 }
 
 export interface Report {
@@ -211,6 +217,10 @@ export function aggregate(
       );
       add(g, re.seconds, billable, re.amount, re.currency);
       g.count++;
+      g.days ??= {};
+      const days = g.days;
+      for (const p of pieces)
+        if (perDay.has(p.date)) days[p.date] = (days[p.date] ?? 0) + p.seconds;
     } else {
       const seen = new Set<string>();
       for (const p of pieces) {

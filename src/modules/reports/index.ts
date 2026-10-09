@@ -43,6 +43,7 @@ const Summary = z.object({
       key: z.string(),
       id: z.number().nullable(),
       workspace_id: z.number().nullable(),
+      days: z.record(z.string(), z.number()).optional(),
     }),
   ),
   totals: Totals,

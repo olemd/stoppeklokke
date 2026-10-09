@@ -55,6 +55,7 @@ describe('summary report', () => {
     expect(byClient[euro.id]).toMatchObject({ seconds: 2 * HOUR, amounts: { EUR: 20000 } });
     expect(r.totals.amounts).toEqual({ NOK: 240000, EUR: 20000 });
     expect(r.days).toHaveLength(30);
+    expect(byClient[acme.id].days).toEqual({ '2026-09-01': 45 * 60, '2026-09-02': 75 * 60 });
   });
 
   it('hides amounts when no rate exists anywhere; non-billable counts hours only', async () => {

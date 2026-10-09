@@ -69,6 +69,27 @@ describe('aggregate', () => {
     expect(r.days.find((d) => d.date === '2026-09-11')?.seconds).toBe(2.5 * 3600);
   });
 
+  it('breaks project groups down per day, split at midnight', () => {
+    const priced = priceEntries(
+      [
+        entry(at(10, 22), at(11, 2, 30), { project_id: 7 }),
+        entry(at(11, 9), at(11, 10), { project_id: 7 }),
+        entry(at(12, 9), at(12, 9, 30), { project_id: 8 }),
+      ],
+      lookup(),
+      new Map(),
+    );
+    const r = aggregate(priced, 'project', { from: '2026-09-07', to: '2026-09-13', tz: TZ });
+    const byId = new Map(r.groups.map((g) => [g.id, g]));
+    expect(byId.get(7)!.days).toEqual({ '2026-09-10': 2 * 3600, '2026-09-11': 3.5 * 3600 });
+    expect(byId.get(8)!.days).toEqual({ '2026-09-12': 1800 });
+    for (const g of r.groups)
+      expect(Object.values(g.days!).reduce((a, s) => a + s, 0)).toBe(g.seconds);
+    expect(
+      aggregate(priced, 'day', { from: '2026-09-07', to: '2026-09-13', tz: TZ }).groups[0]!.days,
+    ).toBeUndefined();
+  });
+
   it('keeps the part after midnight of the last day on its real date', () => {
     const priced = priceEntries(
       [entry(at(30, 23), zonedToEpoch(2026, 10, 1, 1, 0, TZ))],
