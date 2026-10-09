@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.0](https://github.com/olemd/stoppeklokke/compare/stoppeklokke-v0.3.0...stoppeklokke-v0.4.0) (2026-10-09)
+
+
+### Features
+
+* **reports:** default period is this week instead of this month ([ac0187c](https://github.com/olemd/stoppeklokke/commit/ac0187c953bf5de917b1740ac7b1c0de863d3c7e))
+
 ## [0.3.0](https://github.com/olemd/stoppeklokke/compare/stoppeklokke-v0.2.1...stoppeklokke-v0.3.0) (2026-10-07)
 
 
