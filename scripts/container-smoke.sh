@@ -32,11 +32,15 @@ echo "health: $health"
 grep -q '"status":"ok"' <<<"$health"
 grep -q '"config_errors":\[\]' <<<"$health"
 
-curl -fsS http://127.0.0.1:18787/ | grep -q '<div id="app">'
+# Capture before grepping: `cmd | grep -q` exits at the first match, the writer
+# gets SIGPIPE and pipefail turns that into exit 141.
+shell="$(curl -fsS http://127.0.0.1:18787/)"
+grep -q '<div id="app">' <<<"$shell"
 test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:18787/assets/missing.js)" = 404
 test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:18787/api/timer)" = 401
 
 podman healthcheck run "$name"
 podman exec "$name" cat /etc/build-info
-podman logs "$name" | grep -q 'migrations applied'
+logs="$(podman logs "$name")"
+grep -q 'migrations applied' <<<"$logs"
 echo "container smoke test OK"
