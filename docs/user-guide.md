@@ -102,7 +102,7 @@ You can choose a fixed answer under **Settings → When a rate changes**. The ru
 
 ![Report for last month grouped by client, with a bar chart of hours per day and totals per currency](screenshots/08-reports.png)
 
-- Choose a period (this/last week, this/last month, this year or custom), a grouping (client, project, day, week, month, or workspace) and filters for billable time and invoicing status (**Not invoiced yet** shows unlocked time only).
+- Choose a period (this/last week, this/last month, this year or custom; default: this week), a grouping (client, project, day, week, month, or workspace) and filters for billable time and invoicing status (**Not invoiced yet** shows unlocked time only).
 - Hours are rounded **per entry** before summing, using the rounding in Settings (or the workspace). Your raw data never changes. Locked periods keep the rounding they were locked with.
 - Amounts are totalled **per currency**. Different currencies are never added or converted.
 - An entry that crosses midnight is split between the two days.
