@@ -18,7 +18,8 @@ Read `SPEC.md` first; it is the source of truth for behaviour. This file records
 - Every commit message is a [Conventional Commit](https://www.conventionalcommits.org/): `type(scope): summary`, e.g. `feat(reports): …`, `fix(bun): …`, `docs: …`. No `Area: summary` style.
 - release-please (`.github/workflows/release-please.yml`) runs on push to `main` only and reads these types: `feat` → minor, `fix` → patch, `feat!`/`BREAKING CHANGE:` → major. `docs`, `chore`, `build`, `ci`, `test`, `refactor` give no release. A user-visible change must be `feat` or `fix`, or it never ships in a release or the CHANGELOG.
 - Feature branches reach `main` through a PR; a push to a feature branch never releases. PRs are merged with a merge commit, so each commit message on the branch lands on `main` as written: get it right before pushing.
-- If a non-conventional commit has already reached `main`, never rewrite `main`. Put `BEGIN_COMMIT_OVERRIDE` / the corrected message(s) / `END_COMMIT_OVERRIDE` in the merged PR's body (or the next PR's), and release-please uses that instead.
+- If a non-conventional commit has already reached `main`, never rewrite `main`. Put `BEGIN_COMMIT_OVERRIDE` / the corrected message(s) / `END_COMMIT_OVERRIDE` in the body of the merged PR that brought it in, and release-please uses that instead. The override replaces the message of **every** commit in that PR (merge commit included), so it only works on a PR that landed as a single commit; on a multi-commit PR it repeats the line once per commit in the CHANGELOG. Otherwise fix it with the next PR: one commit carrying the correct `feat`/`fix` message lands it in the next release.
+- Check the release PR's CHANGELOG before merging it. Fixing it means fixing its source (commit messages or overrides), since release-please regenerates its branch on every push to `main`.
 
 ## Layout and boundaries
 
