@@ -43,8 +43,8 @@ interface Summary {
 export function ReportsScreen() {
   const tz = settings.value!.timezone;
   const today = dateOf(Math.floor(Date.now() / 1000), tz);
-  const [preset, setPreset] = useState<Preset>('thisMonth');
-  const [range, setRange] = useState(presetRange('thisMonth', today));
+  const [preset, setPreset] = useState<Preset>('thisWeek');
+  const [range, setRange] = useState(presetRange('thisWeek', today));
   const all = filterWorkspaceId.value === null && multiWorkspace.value;
   const [groupBy, setGroupBy] = useState<GroupBy>(all ? 'workspace' : 'project');
   const [billable, setBillable] = useState('all');
