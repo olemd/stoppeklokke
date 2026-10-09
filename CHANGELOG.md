@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.5.0](https://github.com/olemd/stoppeklokke/compare/stoppeklokke-v0.4.0...stoppeklokke-v0.5.0) (2026-10-09)
+
+
+### Features
+
+* **reports:** show hours per day as columns for periods of up to a week ([81725af](https://github.com/olemd/stoppeklokke/commit/81725af74511c56629a25fd1ed1c205cea5037eb))
+* **reports:** show hours per day as columns for periods of up to a week ([33afd1a](https://github.com/olemd/stoppeklokke/commit/33afd1ad8f5e43b70e1c9334247b7de7f31e6468))
+
 ## [0.4.0](https://github.com/olemd/stoppeklokke/compare/stoppeklokke-v0.3.0...stoppeklokke-v0.4.0) (2026-10-09)
 
 
