@@ -115,10 +115,13 @@ export function ReportsScreen() {
         : { period: p === 'thisWeek' ? null : p, from: null, to: null },
     );
   const setRange = (r: Range) => update({ period: 'custom', from: r.from, to: r.to });
-  /** Previous/next period of the same size; lands on a named preset when it matches one. */
+  /**
+   * Previous/next period of the same size. Lands on a named preset whenever
+   * it matches one, so ‹ then › from "last month" is "last month" again.
+   */
   const step = (dir: 1 | -1) => {
     const r = shiftRange(range, dir);
-    const p = preset === 'custom' ? 'custom' : matchPreset(r, today);
+    const p = matchPreset(r, today);
     if (p === 'custom') setRange(r);
     else setPreset(p);
   };
