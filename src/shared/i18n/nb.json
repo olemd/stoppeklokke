@@ -252,6 +252,8 @@
     "lastMonth": "Forrige måned",
     "thisYear": "I år",
     "custom": "Egendefinert",
+    "prevPeriod": "Forrige periode",
+    "nextPeriod": "Neste periode",
     "from": "Fra",
     "to": "Til",
     "groupBy": "Grupper etter",

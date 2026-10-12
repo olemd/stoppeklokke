@@ -1099,3 +1099,19 @@ code.secret {
   min-height: 44px;
   font-weight: 600;
 }
+
+/* Report period stepper: ‹ › and the dates the period covers. */
+.period-step {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.period-step .btn {
+  min-width: 44px;
+  font-size: 1.2rem;
+  line-height: 1;
+}
+.period-range {
+  color: var(--steel);
+  font-variant-numeric: tabular-nums;
+}

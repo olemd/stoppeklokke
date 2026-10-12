@@ -76,6 +76,24 @@ export function formatCalendarDate(date: string, prefs: Pick<DisplayPrefs, 'loca
   return f.format(Date.parse(`${date}T12:00:00Z`));
 }
 
+/**
+ * An inclusive calendar date range with the year, compacted by the locale
+ * ("1–30 Sept 2026", "1.–30. sep. 2026"). Shows which dates a report preset
+ * or a stepped period covers.
+ */
+export function formatCalendarRange(
+  from: string,
+  to: string,
+  prefs: Pick<DisplayPrefs, 'locale'>,
+): string {
+  return new Intl.DateTimeFormat(dateLocale(prefs.locale), {
+    timeZone: 'UTC',
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  }).formatRange(Date.parse(`${from}T12:00:00Z`), Date.parse(`${to}T12:00:00Z`));
+}
+
 /** Decimal hours with the locale's decimal mark: 7.75 / 7,75. */
 export function formatDecimalHours(seconds: number, locale: string, digits = 2): string {
   return new Intl.NumberFormat(locale, {

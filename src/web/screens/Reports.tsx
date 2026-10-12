@@ -12,14 +12,21 @@
 import { useEffect, useState } from 'preact/hooks';
 import { formatDecimalHours } from '../../core/time/format';
 import { dateOf, isValidDate } from '../../core/time/tz';
-import { formatCalendarDate } from '../../core/time/format';
+import { formatCalendarDate, formatCalendarRange } from '../../core/time/format';
 import { DayChart } from '../components/DayChart';
 import { showError } from '../components/Toast';
 import { get, qs } from '../lib/api';
 import { hm, money } from '../lib/fmt';
 import { t, translator } from '../lib/i18n';
 import { lockPeriodFlow, unlockFlow, type Lock } from '../lib/locks';
-import { PRESETS, presetRange, type Preset, type Range } from '../lib/periods';
+import {
+  matchPreset,
+  PRESETS,
+  presetRange,
+  shiftRange,
+  type Preset,
+  type Range,
+} from '../lib/periods';
 import { query, setQuery } from '../lib/router';
 import {
   activeWorkspaceId,
@@ -107,6 +114,13 @@ export function ReportsScreen() {
         : { period: p === 'thisWeek' ? null : p, from: null, to: null },
     );
   const setRange = (r: Range) => update({ period: 'custom', from: r.from, to: r.to });
+  /** Previous/next period of the same size; lands on a named preset when it matches one. */
+  const step = (dir: 1 | -1) => {
+    const r = shiftRange(range, dir);
+    const p = preset === 'custom' ? 'custom' : matchPreset(r, today);
+    if (p === 'custom') setRange(r);
+    else setPreset(p);
+  };
 
   const [data, setData] = useState<Summary | null>(null);
   const [locks, setLocks] = useState<Lock[]>([]);
@@ -227,6 +241,27 @@ export function ReportsScreen() {
             </div>
           </>
         )}
+        <div class="period-step">
+          <button
+            type="button"
+            class="btn plain"
+            aria-label={t('reports.prevPeriod')}
+            onClick={() => step(-1)}
+          >
+            <span aria-hidden="true">‹</span>
+          </button>
+          <button
+            type="button"
+            class="btn plain"
+            aria-label={t('reports.nextPeriod')}
+            onClick={() => step(1)}
+          >
+            <span aria-hidden="true">›</span>
+          </button>
+          <span class="period-range" aria-live="polite">
+            {formatCalendarRange(range.from, range.to, loc)}
+          </span>
+        </div>
         <div class="field">
           <label for="r-group">{t('reports.groupBy')}</label>
           <select

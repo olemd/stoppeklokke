@@ -252,6 +252,8 @@
     "lastMonth": "Last month",
     "thisYear": "This year",
     "custom": "Custom",
+    "prevPeriod": "Previous period",
+    "nextPeriod": "Next period",
     "from": "From",
     "to": "To",
     "groupBy": "Group by",

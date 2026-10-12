@@ -10,6 +10,7 @@ import {
   splitByDay,
 } from '../src/core/time/duration';
 import {
+  formatCalendarRange,
   formatDate,
   formatDecimalHours,
   formatMoney,
@@ -143,6 +144,12 @@ describe('durations', () => {
       { date: '2026-10-07', seconds: 2 * 3600 },
       { date: '2026-10-08', seconds: 2.5 * 3600 },
     ]);
+  });
+
+  it('formats a date range with the year', () => {
+    const r = formatCalendarRange('2026-09-01', '2026-09-30', { locale: 'en' });
+    expect(r).toMatch(/^1\D+30 Sept? 2026$/);
+    expect(formatCalendarRange('2026-12-28', '2027-01-03', { locale: 'nb' })).toMatch(/2026.*2027/);
   });
 
   it('sums seconds per day with midnight splits and a running entry', () => {
