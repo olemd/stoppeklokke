@@ -330,6 +330,7 @@
   },
   "bulk": {
     "select": "Select {description}",
+    "choose": "Select",
     "selected": "{count} selected",
     "rateLock": "Lock rate",
     "rateUnlock": "Release rate",

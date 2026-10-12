@@ -63,7 +63,7 @@ The log shows one week (Monday to Sunday) with the entries for each day and day 
 
 - **Add time** adds an entry by hand, with an end time or a duration (`1:30`, `1h30m`, `1,5` or `90`).
 - **Edit** changes date, times, description, project and billable. An end time earlier than the start means the entry ends after midnight.
-- Select several entries with the checkboxes to **lock** or **release** their hourly rate.
+- Select several entries with the checkboxes to **lock** or **release** their hourly rate. On a phone, tap **Select** first to show the checkboxes.
 - Icons: 🔒 the entry is in a locked (invoiced) period and cannot be changed; ⚓ its hourly rate is locked; ⚠ it overlaps another entry. Overlaps are allowed (sometimes intentional), only flagged.
 
 ![Editing an entry in place](screenshots/07-log-edit.png)

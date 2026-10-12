@@ -1101,6 +1101,23 @@ progress.bar.small {
     grid-template-areas: 'sel sw main flags time dur act';
   }
 }
+/* Phones show the checkboxes only after "Select" (.selecting). */
+@media (min-width: 48rem) {
+  .select-toggle {
+    display: none;
+  }
+}
+@media (max-width: 47.99rem) {
+  .log-screen:not(.selecting) .entry-row .select {
+    display: none;
+  }
+  .log-screen:not(.selecting) .entry-row.selectable {
+    grid-template-columns: 0.3rem 1fr auto;
+    grid-template-areas:
+      'sw main dur'
+      'sw time act';
+  }
+}
 .bulk-bar {
   position: sticky;
   top: 0.5rem;

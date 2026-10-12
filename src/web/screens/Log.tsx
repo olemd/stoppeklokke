@@ -49,6 +49,8 @@ export function LogScreen() {
   });
   const [locks, setLocks] = useState<Map<number, string>>(new Map());
   const [selected, setSelected] = useState<Set<number>>(new Set());
+  // Phones hide the multi-select checkboxes (a desktop task) until "Select".
+  const [selecting, setSelecting] = useState(false);
 
   const reload = async () => {
     try {
@@ -125,7 +127,7 @@ export function LogScreen() {
   const loc = { locale: translator.value.locale };
 
   return (
-    <div class="log-screen stack">
+    <div class={`log-screen stack${selecting ? ' selecting' : ''}`}>
       <div class="page-head">
         <h1 tabIndex={-1}>{t('log.week', { week: wk.week })}</h1>
         <nav class="week-nav" aria-label={t('log.title')}>
@@ -153,6 +155,17 @@ export function LogScreen() {
             <span aria-hidden="true"> ›</span>
           </button>
         </nav>
+        <button
+          type="button"
+          class="btn plain select-toggle"
+          aria-pressed={selecting}
+          onClick={() => {
+            if (selecting) setSelected(new Set());
+            setSelecting(!selecting);
+          }}
+        >
+          {t('bulk.choose')}
+        </button>
         <button
           type="button"
           class="btn primary"

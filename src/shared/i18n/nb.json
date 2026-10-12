@@ -330,6 +330,7 @@
   },
   "bulk": {
     "select": "Velg {description}",
+    "choose": "Velg",
     "selected": "{count} valgt",
     "rateLock": "Lås timepris",
     "rateUnlock": "Frigjør timepris",
