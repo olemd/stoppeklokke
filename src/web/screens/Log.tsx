@@ -16,7 +16,7 @@ import { entryColor, entryLabel, hm, rate, time } from '../lib/fmt';
 import { withConflicts } from '../lib/flows';
 import { t, translator } from '../lib/i18n';
 import { navigate, query } from '../lib/router';
-import { ESCAPE_EVENT } from '../lib/shortcuts';
+import { ESCAPE_EVENT, useScreenKeys } from '../lib/shortcuts';
 import {
   activeWorkspaceId,
   filterWorkspaceId,
@@ -43,6 +43,10 @@ export function LogScreen() {
     addEventListener(ESCAPE_EVENT, close);
     return () => removeEventListener(ESCAPE_EVENT, close);
   }, []);
+  useScreenKeys({
+    ArrowLeft: () => navigate(`/log?week=${addDays(week, -7)}`),
+    ArrowRight: () => navigate(`/log?week=${addDays(week, 7)}`),
+  });
   const [locks, setLocks] = useState<Map<number, string>>(new Map());
   const [selected, setSelected] = useState<Set<number>>(new Set());
 
@@ -128,6 +132,7 @@ export function LogScreen() {
           <button
             type="button"
             class="btn plain small"
+            aria-keyshortcuts="ArrowLeft"
             onClick={() => navigate(`/log?week=${addDays(week, -7)}`)}
           >
             <span aria-hidden="true">‹ </span>
@@ -141,6 +146,7 @@ export function LogScreen() {
           <button
             type="button"
             class="btn plain small"
+            aria-keyshortcuts="ArrowRight"
             onClick={() => navigate(`/log?week=${addDays(week, 7)}`)}
           >
             {t('log.nextWeek')}

@@ -103,6 +103,8 @@ You can choose a fixed answer under **Settings → When a rate changes**. The ru
 ![Report for last month grouped by client, with a bar chart of hours per day and totals per currency](screenshots/08-reports.png)
 
 - Choose a period (this/last week, this/last month, this year or custom; default: this week), a grouping (client, project, day, week, month, or workspace) and filters for billable time and invoicing status (**Not invoiced yet** shows unlocked time only).
+- **‹** and **›** step to the previous or next period of the same size (a month by calendar months). The dates covered are shown next to them.
+- The filters are part of the page address, so you can bookmark a report. A bookmarked preset such as *Last month* always means last month.
 - For a week or shorter, grouped by client, project or workspace, the table shows **one column per day** with daily totals at the bottom, like a timesheet.
 - Hours are rounded **per entry** before summing, using the rounding in Settings (or the workspace). Your raw data never changes. Locked periods keep the rounding they were locked with.
 - Amounts are totalled **per currency**. Different currencies are never added or converted.
@@ -155,12 +157,14 @@ The interface is available in English and Norwegian Bokmål. Times use the 24-ho
 
 ## Keyboard shortcuts
 
-| Key   | Action                              |
-| ----- | ----------------------------------- |
-| `s`   | Start/stop the timer (timer screen) |
-| `n`   | Add time in the log                 |
-| `/`   | Search projects                     |
-| `Esc` | Close the open form or dialog       |
+| Key     | Action                                       |
+| ------- | -------------------------------------------- |
+| `s`     | Start/stop the timer (timer screen)          |
+| `n`     | Add time in the log                          |
+| `/`     | Search projects                              |
+| `←` `→` | Previous/next week (log) or period (reports) |
+| `g`     | Choose the report grouping                   |
+| `Esc`   | Close the open form or dialog                |
 
 ## API tokens and webhooks
 

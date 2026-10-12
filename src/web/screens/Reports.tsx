@@ -28,6 +28,7 @@ import {
   type Range,
 } from '../lib/periods';
 import { query, setQuery } from '../lib/router';
+import { useScreenKeys } from '../lib/shortcuts';
 import {
   activeWorkspaceId,
   clientById,
@@ -121,6 +122,12 @@ export function ReportsScreen() {
     if (p === 'custom') setRange(r);
     else setPreset(p);
   };
+
+  useScreenKeys({
+    ArrowLeft: () => step(-1),
+    ArrowRight: () => step(1),
+    g: () => document.getElementById('r-group')?.focus(),
+  });
 
   const [data, setData] = useState<Summary | null>(null);
   const [locks, setLocks] = useState<Lock[]>([]);
@@ -246,6 +253,7 @@ export function ReportsScreen() {
             type="button"
             class="btn plain"
             aria-label={t('reports.prevPeriod')}
+            aria-keyshortcuts="ArrowLeft"
             onClick={() => step(-1)}
           >
             <span aria-hidden="true">‹</span>
@@ -254,6 +262,7 @@ export function ReportsScreen() {
             type="button"
             class="btn plain"
             aria-label={t('reports.nextPeriod')}
+            aria-keyshortcuts="ArrowRight"
             onClick={() => step(1)}
           >
             <span aria-hidden="true">›</span>
@@ -266,6 +275,7 @@ export function ReportsScreen() {
           <label for="r-group">{t('reports.groupBy')}</label>
           <select
             id="r-group"
+            aria-keyshortcuts="g"
             value={groupBy}
             onChange={(e) => update({ group: e.currentTarget.value })}
           >
