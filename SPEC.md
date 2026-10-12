@@ -406,7 +406,7 @@ GET    /api/openapi.json
 6. **Footer (every page, including login):** "Stoppeklokke vX.Y.Z · Source code (AGPL-3.0)" linking to `SOURCE_URL`. Version and git SHA are baked in at build time.
 
 ### 7.2 PWA
-- `manifest.webmanifest` with name, icons (192/512 + maskable), `display: standalone`, `start_url: /`. Manifest name/description localised per build default (`en`).
+- `manifest.webmanifest` with name, icons (192/512 + maskable), `display: standalone`, `start_url: /`. App shortcuts (long-press the icon): "Start or stop the timer" (`/?action=toggle`, acted on only in standalone mode) and "Add time" (`/log?new=1`). Manifest name/description localised per build default (`en`).
 - Service worker: precache the app shell (hand-written or a minimal Vite plugin; avoid Workbox bloat). Network-first for `/api/*`, cache fallback for GET.
 - Push handler in the SW: shows the notification with actions **"Stop"** and **"Keep going"**. "Stop" calls `/api/timer/stop` directly from the SW (cookie is sent; same-origin POST includes `Origin`) and shows a confirmation.
 - iOS: Web Push requires the app to be added to the home screen, and the installed PWA has its own cookie jar (log in once inside it). Show an explanation in settings when `Notification` is unavailable.

@@ -51,6 +51,8 @@ The home screen is a stopwatch. Press the round button (or `s` on a keyboard) to
 
 ![Project picker listing workspaces, projects and clients](screenshots/05-project-picker.png)
 
+On Android and desktop, long-press (or right-click) the installed app's icon for two shortcuts: **Start or stop the timer** and **Add time**.
+
 Starting a new timer while one is running stops the old one at the exact moment the new one starts, so the two never overlap. A timer that runs past midnight is never split or stopped automatically; reports split it by day. If a timer has run for more than 24 hours when you stop it, Stoppeklokke asks when you actually stopped.
 
 ## The log

@@ -20,6 +20,7 @@ import { entryColor, entryLabel, hm, time } from '../lib/fmt';
 import { stopFlow, withConflicts } from '../lib/flows';
 import { startTimerOfflineAware, stopTimerOfflineAware } from '../lib/offline';
 import { t } from '../lib/i18n';
+import { query, setQuery } from '../lib/router';
 import { activeWorkspaceId, activeWorkspaces, settings, timer, workspaceById } from '../lib/store';
 
 const nowSec = () => Math.floor(Date.now() / 1000);
@@ -183,6 +184,16 @@ export function TimerScreen() {
     };
     addEventListener('keydown', onKey);
     return () => removeEventListener('keydown', onKey);
+  }, []);
+
+  // PWA shortcut "Start or stop the timer" (manifest `shortcuts`, §7.2) opens
+  // /?action=toggle. The parameter is removed first so a reload cannot toggle
+  // again, and it only acts in the installed app (standalone): a link on some
+  // other site must not be able to start or stop the timer in a browser tab.
+  useEffect(() => {
+    if (query.value.get('action') !== 'toggle') return;
+    setQuery({});
+    if (matchMedia('(display-mode: standalone)').matches) void toggleRef.current();
   }, []);
 
   const patchRunning = async (body: Record<string, unknown>) => {
