@@ -264,9 +264,6 @@ a {
     text-align: center;
     font-size: 0.875rem;
   }
-  .ws-switch {
-    margin-inline-start: auto;
-  }
 }
 
 .offline-banner {
@@ -892,8 +889,41 @@ progress.bar.small {
   justify-self: start;
 }
 
-/* Mobile bottom bar: tabs share the width equally and may wrap (long nb labels). */
+/*
+ * Mobile bottom bar: four equal icon + label tabs. Settings lives in the
+ * header there (.header-settings) so the labels fit without wrapping.
+ */
+.header-settings {
+  display: none;
+}
+.nav-icon,
+.header-settings .icon {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+@media (min-width: 48rem) {
+  .nav-icon,
+  .label-short {
+    display: none;
+  }
+}
 @media (max-width: 47.99rem) {
+  .brand {
+    margin-inline-end: auto;
+  }
+  .header-settings {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    min-height: 44px;
+    border-radius: var(--radius-s);
+    color: var(--steel);
+  }
+  .header-settings[aria-current='page'] {
+    color: var(--ink);
+    background: var(--track);
+  }
   .nav ul {
     gap: 0;
   }
@@ -901,15 +931,20 @@ progress.bar.small {
     flex: 1;
     min-width: 0;
   }
+  .nav .nav-settings,
+  .label-long {
+    display: none;
+  }
   .nav a {
-    padding: 0.6rem 0.15rem;
+    padding: 0.4rem 0.15rem;
     font-size: 0.75rem;
-    overflow-wrap: anywhere;
-    hyphens: auto;
     border-radius: 0;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
+    gap: 0.15rem;
+    overflow-wrap: anywhere;
   }
 }
 
