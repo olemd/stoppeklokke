@@ -98,6 +98,7 @@
     "running": "Running",
     "idle": "Not running",
     "startedAt": "Started {time}",
+    "adjust": "change start time or discard",
     "description": "What are you working on?",
     "descriptionLabel": "Description",
     "project": "Project",

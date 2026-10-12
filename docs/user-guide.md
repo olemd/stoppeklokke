@@ -43,8 +43,7 @@ The home screen is a stopwatch. Press the round button (or `s` on a keyboard) to
 
 - **Description**: what you are working on. Suggestions come from the last 90 days: the selected project's descriptions first, then matches at the start of a word, then anywhere. Picking a suggestion also selects the project you last used with it.
 - **Project**: search projects and clients. Recently used come first. With several workspaces, the active one is listed first and the others below, so you can start a timer in another role without switching.
-- While the timer runs you can change the description, the project and the **start time**. Forgot to start? Type an earlier start time.
-- **Discard** throws the running time away.
+- While the timer runs you can change the description and the project. Tap **Started 10:08** to change the **start time** (forgot to start? type an earlier one) or to **Discard** the running time.
 - The ring around the button and the bar under **Today** show progress towards your daily target (7:30 by default).
 - **Continue** on any entry starts a new timer with the same project and description.
 

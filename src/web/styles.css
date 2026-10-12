@@ -519,7 +519,23 @@ details > summary {
   line-height: 1;
 }
 .started {
+  font: inherit;
   color: var(--steel);
+  background: transparent;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  padding: 0.3rem 1rem;
+  min-height: 44px;
+  cursor: pointer;
+}
+/* Start time and Discard, shown from the "Started 10:08" disclosure. */
+.timer-adjust {
+  display: grid;
+  gap: var(--gap);
+  justify-items: start;
+}
+.timer-adjust[hidden] {
+  display: none;
 }
 .timer-fields {
   width: 100%;
