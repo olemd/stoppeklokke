@@ -23,6 +23,7 @@ import {
   projectById,
   settings,
 } from '../lib/store';
+import { lastReports } from './Reports';
 
 interface Line {
   project_id: number | null;
@@ -132,6 +133,10 @@ export function InvoiceScreen() {
 
   return (
     <div class="invoice stack">
+      <a class="back no-print" href={lastReports.href}>
+        <span aria-hidden="true">‹ </span>
+        {t('invoice.back')}
+      </a>
       <div class="page-head">
         <h1 tabIndex={-1}>
           {t('invoice.title')}

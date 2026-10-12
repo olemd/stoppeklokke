@@ -306,6 +306,7 @@
   },
   "invoice": {
     "title": "Invoice basis",
+    "back": "Back to reports",
     "intro": "Review, create the invoice in your invoicing system, then lock the period with the invoice number.",
     "client": "Client",
     "chooseClient": "Choose a client",

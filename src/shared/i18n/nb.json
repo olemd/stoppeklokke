@@ -306,6 +306,7 @@
   },
   "invoice": {
     "title": "Fakturagrunnlag",
+    "back": "Tilbake til rapporter",
     "intro": "Se over, lag fakturaen i faktureringssystemet ditt, og lås så perioden med fakturanummeret.",
     "client": "Kunde",
     "chooseClient": "Velg en kunde",

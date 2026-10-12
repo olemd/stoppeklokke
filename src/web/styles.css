@@ -1091,3 +1091,11 @@ code.secret {
 .file-btn.is-disabled {
   opacity: 0.55;
 }
+
+/* "‹ Back to reports" above the invoice basis heading. */
+.back {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-weight: 600;
+}
