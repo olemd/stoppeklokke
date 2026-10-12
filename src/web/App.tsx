@@ -152,7 +152,11 @@ function Shell({ children, bare = false }: { children: preact.ComponentChildren;
         </p>
       )}
       {!bare && <SyncStatus />}
-      <main id="main" class={bare ? 'main narrow' : 'main'}>
+      {/* Reports get more width on large screens: many currency/day columns. */}
+      <main
+        id="main"
+        class={bare ? 'main narrow' : route.value === '/reports' ? 'main wide' : 'main'}
+      >
         {children}
       </main>
       <Footer />
