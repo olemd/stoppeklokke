@@ -911,6 +911,28 @@ progress.bar.small {
   .brand {
     margin-inline-end: auto;
   }
+  /*
+   * With several workspaces the switcher takes the room the app name had:
+   * the name stays for screen readers, the dot still shows a running timer.
+   */
+  .header:has(.ws-switch) .brand-name {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+  .header:has(.ws-switch) {
+    gap: 0.5rem;
+  }
+  .ws-switch {
+    flex: 1;
+    min-width: 0;
+  }
+  .ws-switch select {
+    max-width: none;
+  }
   .header-settings {
     display: inline-flex;
     align-items: center;
