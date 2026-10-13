@@ -68,7 +68,7 @@ The log shows one week (Monday to Sunday) with the entries for each day and day 
 
 ![Editing an entry in place](screenshots/07-log-edit.png)
 
-Entries cannot be more than 5 minutes in the future. Entries longer than 24 hours need a confirmation.
+Entries cannot be more than 2 hours in the future (a running timer: 5 minutes). Entries longer than 24 hours need a confirmation.
 
 ## Projects, clients and workspaces
 

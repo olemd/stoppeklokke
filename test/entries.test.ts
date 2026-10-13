@@ -68,9 +68,21 @@ describe('manual entries', () => {
         .body.error,
     ).toBe('end_before_start');
     expect(
-      (await h.json('/api/entries', { method: 'POST', json: entry({ end_at: now + 600 }) })).body
-        .error,
+      (
+        await h.json('/api/entries', {
+          method: 'POST',
+          json: entry({ start_at: now + HOUR, end_at: now + 2 * HOUR + 1 }),
+        })
+      ).body.error,
     ).toBe('in_future');
+    // Planned work later today: up to two hours ahead is fine.
+    await call(
+      h,
+      'POST',
+      '/api/entries',
+      entry({ start_at: now + HOUR, end_at: now + 2 * HOUR }),
+      201,
+    );
     const long = { start_at: now - 30 * HOUR, end_at: now - HOUR };
     expect((await h.json('/api/entries', { method: 'POST', json: long })).body.error).toBe(
       'too_long',
