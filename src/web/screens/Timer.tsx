@@ -2,7 +2,9 @@
 /**
  * Home screen (§7.1): the stopwatch. Running time ticks locally from start_at
  * (never polled). The running entry's project, description and start time are
- * editable in place while it runs.
+ * editable in place while it runs. Start time and Discard are rarely needed,
+ * so they sit behind the "Started 10:08" disclosure: on a phone that keeps
+ * today's list (and its Continue buttons) close to the top.
  */
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { formatHMS, splitByDay } from '../../core/time/duration';
@@ -18,6 +20,7 @@ import { entryColor, entryLabel, hm, time } from '../lib/fmt';
 import { stopFlow, withConflicts } from '../lib/flows';
 import { startTimerOfflineAware, stopTimerOfflineAware } from '../lib/offline';
 import { t } from '../lib/i18n';
+import { query, setQuery } from '../lib/router';
 import { activeWorkspaceId, activeWorkspaces, settings, timer, workspaceById } from '../lib/store';
 
 const nowSec = () => Math.floor(Date.now() / 1000);
@@ -95,6 +98,8 @@ export function TimerScreen() {
   const today = dateOf(now, tz);
   const [entries, setEntries] = useState<Entry[]>([]);
   const [busy, setBusy] = useState(false);
+  const [adjusting, setAdjusting] = useState(false);
+  useEffect(() => setAdjusting(false), [running?.id]);
   // Fields for the NEXT timer while idle; mirrors the running entry otherwise.
   const [draft, setDraft] = useState<{ refs: Refs; description: string }>({
     refs: { workspace_id: activeWorkspaceId.value, client_id: null, project_id: null },
@@ -181,6 +186,16 @@ export function TimerScreen() {
     return () => removeEventListener('keydown', onKey);
   }, []);
 
+  // PWA shortcut "Start or stop the timer" (manifest `shortcuts`, §7.2) opens
+  // /?action=toggle. The parameter is removed first so a reload cannot toggle
+  // again, and it only acts in the installed app (standalone): a link on some
+  // other site must not be able to start or stop the timer in a browser tab.
+  useEffect(() => {
+    if (query.value.get('action') !== 'toggle') return;
+    setQuery({});
+    if (matchMedia('(display-mode: standalone)').matches) void toggleRef.current();
+  }, []);
+
   const patchRunning = async (body: Record<string, unknown>) => {
     try {
       const r = await withConflicts((x) => patch<Entry>('/timer', { ...body, ...x }));
@@ -233,8 +248,54 @@ export function TimerScreen() {
           onToggle={toggle}
           busy={busy}
         />
-        {running && <p class="started">{t('timer.startedAt', { time: time(running.start_at) })}</p>}
+        {running && (
+          <button
+            type="button"
+            class="started"
+            aria-expanded={adjusting}
+            aria-controls="timer-adjust"
+            onClick={() => setAdjusting(!adjusting)}
+          >
+            {t('timer.startedAt', { time: time(running.start_at) })}
+            <span class="visually-hidden">, {t('timer.adjust')}</span>
+            <span aria-hidden="true">{adjusting ? ' ▴' : ' ▾'}</span>
+          </button>
+        )}
         <div class="timer-fields">
+          {running && (
+            <div id="timer-adjust" class="timer-adjust" hidden={!adjusting}>
+              <TimeInput
+                id="start-time"
+                label={t('timer.startTime')}
+                value={startClock}
+                required
+                onChange={(v) => {
+                  if (!v) return;
+                  const { year, month, day } = parseDate(dateOf(running.start_at, tz));
+                  let at = zonedToEpoch(year, month, day, v.hour, v.minute, tz);
+                  if (at > nowSec() + 300) at -= 86400; // "23:50" typed just after midnight means yesterday
+                  if (at !== running.start_at) void patchRunning({ start_at: at });
+                }}
+              />
+              <button
+                type="button"
+                class="btn plain"
+                onClick={async () => {
+                  if (!(await confirmAction(t('timer.discardConfirm'), t('timer.discard'), true)))
+                    return;
+                  try {
+                    await post('/timer/discard');
+                    timer.value = null;
+                    toast(t('timer.discarded'));
+                  } catch (err) {
+                    showError(err);
+                  }
+                }}
+              >
+                {t('timer.discard')}
+              </button>
+            </div>
+          )}
           <DescriptionInput
             id="desc"
             label={t('timer.descriptionLabel')}
@@ -271,40 +332,6 @@ export function TimerScreen() {
               running ? void patchRunning({ ...v }) : setDraft({ ...draft, refs: v })
             }
           />
-          {running && (
-            <TimeInput
-              id="start-time"
-              label={t('timer.startTime')}
-              value={startClock}
-              required
-              onChange={(v) => {
-                if (!v) return;
-                const { year, month, day } = parseDate(dateOf(running.start_at, tz));
-                let at = zonedToEpoch(year, month, day, v.hour, v.minute, tz);
-                if (at > nowSec() + 300) at -= 86400; // "23:50" typed just after midnight means yesterday
-                if (at !== running.start_at) void patchRunning({ start_at: at });
-              }}
-            />
-          )}
-          {running && (
-            <button
-              type="button"
-              class="btn plain"
-              onClick={async () => {
-                if (!(await confirmAction(t('timer.discardConfirm'), t('timer.discard'), true)))
-                  return;
-                try {
-                  await post('/timer/discard');
-                  timer.value = null;
-                  toast(t('timer.discarded'));
-                } catch (err) {
-                  showError(err);
-                }
-              }}
-            >
-              {t('timer.discard')}
-            </button>
-          )}
         </div>
       </section>
 

@@ -3,18 +3,32 @@
  * Reports (§7.1 #3): period presets, grouping, billable and invoicing
  * filters, hours / billable hours / amounts per currency, a per-day chart,
  * CSV export, and period locks.
+ *
+ * The filters live in the URL query (period, from, to, group, billable,
+ * locked, decimal), so a report survives a trip to the invoice basis and back
+ * and can be bookmarked. A preset is stored by name, so a bookmarked "last
+ * month" stays relative; only a custom period stores its dates.
  */
 import { useEffect, useState } from 'preact/hooks';
 import { formatDecimalHours } from '../../core/time/format';
-import { dateOf } from '../../core/time/tz';
-import { formatCalendarDate } from '../../core/time/format';
+import { dateOf, isValidDate } from '../../core/time/tz';
+import { formatCalendarDate, formatCalendarRange } from '../../core/time/format';
 import { DayChart } from '../components/DayChart';
 import { showError } from '../components/Toast';
 import { get, qs } from '../lib/api';
 import { hm, money } from '../lib/fmt';
 import { t, translator } from '../lib/i18n';
 import { lockPeriodFlow, unlockFlow, type Lock } from '../lib/locks';
-import { PRESETS, presetRange, type Preset } from '../lib/periods';
+import {
+  matchPreset,
+  PRESETS,
+  presetRange,
+  shiftRange,
+  type Preset,
+  type Range,
+} from '../lib/periods';
+import { query, setQuery } from '../lib/router';
+import { useScreenKeys } from '../lib/shortcuts';
 import {
   activeWorkspaceId,
   clientById,
@@ -25,7 +39,13 @@ import {
   workspaceById,
 } from '../lib/store';
 
-type GroupBy = 'workspace' | 'client' | 'project' | 'day' | 'week' | 'month';
+const GROUPS = ['workspace', 'client', 'project', 'day', 'week', 'month'] as const;
+type GroupBy = (typeof GROUPS)[number];
+const BILLABLE = ['all', 'true', 'false'];
+const LOCKED = ['all', 'unlocked', 'locked'];
+
+/** The current report's URL, so the invoice basis can link back to the same view. */
+export const lastReports = { href: '/reports' };
 
 interface Totals {
   seconds: number;
@@ -48,16 +68,72 @@ interface Summary {
 export function ReportsScreen() {
   const tz = settings.value!.timezone;
   const today = dateOf(Math.floor(Date.now() / 1000), tz);
-  const [preset, setPreset] = useState<Preset>('thisWeek');
-  const [range, setRange] = useState(presetRange('thisWeek', today));
-  const all = filterWorkspaceId.value === null && multiWorkspace.value;
-  const [groupBy, setGroupBy] = useState<GroupBy>(all ? 'workspace' : 'project');
-  const [billable, setBillable] = useState('all');
-  const [locked, setLocked] = useState('all');
-  const [decimal, setDecimal] = useState(false);
+  const workspaceId = filterWorkspaceId.value;
+  const showWorkspace = multiWorkspace.value && workspaceId === null;
+
+  // Filters from the URL, each validated with a fallback to its default.
+  const q = query.value;
+  const named = q.get('period') as Preset | null;
+  const preset: Preset = named && PRESETS.includes(named) ? named : 'thisWeek';
+  const qFrom = q.get('from') ?? '';
+  const qTo = q.get('to') ?? '';
+  const range: Range =
+    preset !== 'custom'
+      ? presetRange(preset, today)
+      : isValidDate(qFrom) && isValidDate(qTo) && qFrom <= qTo
+        ? { from: qFrom, to: qTo }
+        : presetRange('thisWeek', today);
+  const qGroup = q.get('group') as GroupBy | null;
+  // With "all workspaces" the default grouping is by workspace (§7.1 #3).
+  const groupBy: GroupBy =
+    qGroup && GROUPS.includes(qGroup) && (qGroup !== 'workspace' || showWorkspace)
+      ? qGroup
+      : showWorkspace
+        ? 'workspace'
+        : 'project';
+  const billable = BILLABLE.includes(q.get('billable') ?? '') ? q.get('billable')! : 'all';
+  const locked = LOCKED.includes(q.get('locked') ?? '') ? q.get('locked')! : 'all';
+  const decimal = q.get('decimal') === '1';
+  lastReports.href = `/reports${q.size ? `?${q}` : ''}`;
+
+  /** Write changed filters to the URL; defaults are left out. */
+  const update = (patch: Record<string, string | null>) =>
+    setQuery({
+      period: preset === 'thisWeek' ? null : preset,
+      from: preset === 'custom' ? range.from : null,
+      to: preset === 'custom' ? range.to : null,
+      group: qGroup,
+      billable: billable === 'all' ? null : billable,
+      locked: locked === 'all' ? null : locked,
+      decimal: decimal ? '1' : null,
+      ...patch,
+    });
+  const setPreset = (p: Preset) =>
+    update(
+      p === 'custom'
+        ? { period: 'custom', from: range.from, to: range.to }
+        : { period: p === 'thisWeek' ? null : p, from: null, to: null },
+    );
+  const setRange = (r: Range) => update({ period: 'custom', from: r.from, to: r.to });
+  /**
+   * Previous/next period of the same size. Lands on a named preset whenever
+   * it matches one, so ‹ then › from "last month" is "last month" again.
+   */
+  const step = (dir: 1 | -1) => {
+    const r = shiftRange(range, dir);
+    const p = matchPreset(r, today);
+    if (p === 'custom') setRange(r);
+    else setPreset(p);
+  };
+
+  useScreenKeys({
+    ArrowLeft: () => step(-1),
+    ArrowRight: () => step(1),
+    g: () => document.getElementById('r-group')?.focus(),
+  });
+
   const [data, setData] = useState<Summary | null>(null);
   const [locks, setLocks] = useState<Lock[]>([]);
-  const workspaceId = filterWorkspaceId.value;
   const params = { from: range.from, to: range.to, workspace_id: workspaceId, billable, locked };
 
   const reload = async () => {
@@ -73,9 +149,6 @@ export function ReportsScreen() {
     }
   };
   useEffect(() => void reload(), [range.from, range.to, groupBy, billable, locked, workspaceId]);
-  useEffect(() => {
-    if (all && groupBy !== 'workspace') setGroupBy('workspace');
-  }, [all]);
 
   const loc = { locale: translator.value.locale };
   const label = (g: Summary['groups'][number]) => {
@@ -105,7 +178,6 @@ export function ReportsScreen() {
   const dur = (s: number) => (decimal ? formatDecimalHours(s, loc.locale) : hm(s));
   const currencies = data ? Object.keys(data.totals.amounts).sort() : [];
   const showAmounts = !!data?.has_amounts && currencies.length > 0;
-  const showWorkspace = multiWorkspace.value && workspaceId === null;
   // Timesheet columns (one per day) for periods of at most a week, when the
   // rows are workspaces/clients/projects rather than time buckets.
   const dayCols =
@@ -146,11 +218,7 @@ export function ReportsScreen() {
           <select
             id="r-period"
             value={preset}
-            onChange={(e) => {
-              const p = e.currentTarget.value as Preset;
-              setPreset(p);
-              if (p !== 'custom') setRange(presetRange(p, today));
-            }}
+            onChange={(e) => setPreset(e.currentTarget.value as Preset)}
           >
             {PRESETS.map((p) => (
               <option key={p} value={p}>
@@ -183,25 +251,53 @@ export function ReportsScreen() {
             </div>
           </>
         )}
+        <div class="period-step">
+          <button
+            type="button"
+            class="btn plain"
+            aria-label={t('reports.prevPeriod')}
+            aria-keyshortcuts="ArrowLeft"
+            onClick={() => step(-1)}
+          >
+            <span aria-hidden="true">‹</span>
+          </button>
+          <button
+            type="button"
+            class="btn plain"
+            aria-label={t('reports.nextPeriod')}
+            aria-keyshortcuts="ArrowRight"
+            onClick={() => step(1)}
+          >
+            <span aria-hidden="true">›</span>
+          </button>
+          <span class="period-range" aria-live="polite">
+            {formatCalendarRange(range.from, range.to, loc)}
+          </span>
+        </div>
         <div class="field">
           <label for="r-group">{t('reports.groupBy')}</label>
           <select
             id="r-group"
+            aria-keyshortcuts="g"
             value={groupBy}
-            onChange={(e) => setGroupBy(e.currentTarget.value as GroupBy)}
+            onChange={(e) => update({ group: e.currentTarget.value })}
           >
-            {(['workspace', 'client', 'project', 'day', 'week', 'month'] as const)
-              .filter((g) => g !== 'workspace' || showWorkspace)
-              .map((g) => (
-                <option key={g} value={g}>
-                  {t(`reports.by${g[0]!.toUpperCase()}${g.slice(1)}`)}
-                </option>
-              ))}
+            {GROUPS.filter((g) => g !== 'workspace' || showWorkspace).map((g) => (
+              <option key={g} value={g}>
+                {t(`reports.by${g[0]!.toUpperCase()}${g.slice(1)}`)}
+              </option>
+            ))}
           </select>
         </div>
         <div class="field">
           <label for="r-bill">{t('reports.billable')}</label>
-          <select id="r-bill" value={billable} onChange={(e) => setBillable(e.currentTarget.value)}>
+          <select
+            id="r-bill"
+            value={billable}
+            onChange={(e) =>
+              update({ billable: e.currentTarget.value === 'all' ? null : e.currentTarget.value })
+            }
+          >
             <option value="all">{t('reports.billableAll')}</option>
             <option value="true">{t('reports.billableOnly')}</option>
             <option value="false">{t('reports.nonBillableOnly')}</option>
@@ -209,7 +305,13 @@ export function ReportsScreen() {
         </div>
         <div class="field">
           <label for="r-locked">{t('reports.locked')}</label>
-          <select id="r-locked" value={locked} onChange={(e) => setLocked(e.currentTarget.value)}>
+          <select
+            id="r-locked"
+            value={locked}
+            onChange={(e) =>
+              update({ locked: e.currentTarget.value === 'all' ? null : e.currentTarget.value })
+            }
+          >
             <option value="all">{t('reports.lockedAll')}</option>
             <option value="unlocked">{t('reports.unlockedOnly')}</option>
             <option value="locked">{t('reports.lockedOnly')}</option>
@@ -219,7 +321,7 @@ export function ReportsScreen() {
           <input
             type="checkbox"
             checked={decimal}
-            onChange={(e) => setDecimal(e.currentTarget.checked)}
+            onChange={(e) => update({ decimal: e.currentTarget.checked ? '1' : null })}
           />
           {t('reports.decimal')}
         </label>

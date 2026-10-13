@@ -15,6 +15,19 @@ export function navigate(href: string, replace = false) {
   queueMicrotask(() => document.querySelector<HTMLElement>('main h1')?.focus());
 }
 
+/**
+ * Replace the current URL's query (e.g. report filters) without a history
+ * entry or moving focus, so a filter control keeps focus while it changes.
+ * Empty values are dropped to keep URLs short.
+ */
+export function setQuery(params: Record<string, string | null | undefined>) {
+  const q = new URLSearchParams();
+  for (const [k, v] of Object.entries(params)) if (v) q.set(k, v);
+  const search = q.toString();
+  history.replaceState(null, '', `${location.pathname}${search ? `?${search}` : ''}`);
+  query.value = q;
+}
+
 addEventListener('popstate', () => {
   route.value = location.pathname;
   query.value = new URLSearchParams(location.search);

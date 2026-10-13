@@ -15,6 +15,7 @@
   "nav": {
     "label": "Main",
     "timer": "Timer",
+    "timerShort": "Timer",
     "log": "Log",
     "reports": "Reports",
     "catalog": "Projects",
@@ -98,6 +99,7 @@
     "running": "Running",
     "idle": "Not running",
     "startedAt": "Started {time}",
+    "adjust": "change start time or discard",
     "description": "What are you working on?",
     "descriptionLabel": "Description",
     "project": "Project",
@@ -252,6 +254,8 @@
     "lastMonth": "Last month",
     "thisYear": "This year",
     "custom": "Custom",
+    "prevPeriod": "Previous period",
+    "nextPeriod": "Next period",
     "from": "From",
     "to": "To",
     "groupBy": "Group by",
@@ -306,6 +310,7 @@
   },
   "invoice": {
     "title": "Invoice basis",
+    "back": "Back to reports",
     "intro": "Review, create the invoice in your invoicing system, then lock the period with the invoice number.",
     "client": "Client",
     "chooseClient": "Choose a client",
@@ -325,6 +330,7 @@
   },
   "bulk": {
     "select": "Select {description}",
+    "choose": "Select",
     "selected": "{count} selected",
     "rateLock": "Lock rate",
     "rateUnlock": "Release rate",

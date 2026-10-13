@@ -43,14 +43,15 @@ The home screen is a stopwatch. Press the round button (or `s` on a keyboard) to
 
 - **Description**: what you are working on. Suggestions come from the last 90 days: the selected project's descriptions first, then matches at the start of a word, then anywhere. Picking a suggestion also selects the project you last used with it.
 - **Project**: search projects and clients. Recently used come first. With several workspaces, the active one is listed first and the others below, so you can start a timer in another role without switching.
-- While the timer runs you can change the description, the project and the **start time**. Forgot to start? Type an earlier start time.
-- **Discard** throws the running time away.
+- While the timer runs you can change the description and the project. Tap **Started 10:08** to change the **start time** (forgot to start? type an earlier one) or to **Discard** the running time.
 - The ring around the button and the bar under **Today** show progress towards your daily target (7:30 by default).
 - **Continue** on any entry starts a new timer with the same project and description.
 
 ![Description field with two suggestions](screenshots/04-autocomplete.png)
 
 ![Project picker listing workspaces, projects and clients](screenshots/05-project-picker.png)
+
+On Android and desktop, long-press (or right-click) the installed app's icon for two shortcuts: **Start or stop the timer** and **Add time**.
 
 Starting a new timer while one is running stops the old one at the exact moment the new one starts, so the two never overlap. A timer that runs past midnight is never split or stopped automatically; reports split it by day. If a timer has run for more than 24 hours when you stop it, Stoppeklokke asks when you actually stopped.
 
@@ -62,12 +63,12 @@ The log shows one week (Monday to Sunday) with the entries for each day and day 
 
 - **Add time** adds an entry by hand, with an end time or a duration (`1:30`, `1h30m`, `1,5` or `90`).
 - **Edit** changes date, times, description, project and billable. An end time earlier than the start means the entry ends after midnight.
-- Select several entries with the checkboxes to **lock** or **release** their hourly rate.
+- Select several entries with the checkboxes to **lock** or **release** their hourly rate. On a phone, tap **Select** first to show the checkboxes.
 - Icons: 🔒 the entry is in a locked (invoiced) period and cannot be changed; ⚓ its hourly rate is locked; ⚠ it overlaps another entry. Overlaps are allowed (sometimes intentional), only flagged.
 
 ![Editing an entry in place](screenshots/07-log-edit.png)
 
-Entries cannot be more than 5 minutes in the future. Entries longer than 24 hours need a confirmation.
+Entries cannot be more than 2 hours in the future (a running timer: 5 minutes). Entries longer than 24 hours need a confirmation.
 
 ## Projects, clients and workspaces
 
@@ -103,6 +104,8 @@ You can choose a fixed answer under **Settings → When a rate changes**. The ru
 ![Report for last month grouped by client, with a bar chart of hours per day and totals per currency](screenshots/08-reports.png)
 
 - Choose a period (this/last week, this/last month, this year or custom; default: this week), a grouping (client, project, day, week, month, or workspace) and filters for billable time and invoicing status (**Not invoiced yet** shows unlocked time only).
+- **‹** and **›** step to the previous or next period of the same size (a month by calendar months). The dates covered are shown next to them.
+- The filters are part of the page address, so you can bookmark a report. A bookmarked preset such as *Last month* always means last month.
 - For a week or shorter, grouped by client, project or workspace, the table shows **one column per day** with daily totals at the bottom, like a timesheet.
 - Hours are rounded **per entry** before summing, using the rounding in Settings (or the workspace). Your raw data never changes. Locked periods keep the rounding they were locked with.
 - Amounts are totalled **per currency**. Different currencies are never added or converted.
@@ -155,12 +158,14 @@ The interface is available in English and Norwegian Bokmål. Times use the 24-ho
 
 ## Keyboard shortcuts
 
-| Key   | Action                              |
-| ----- | ----------------------------------- |
-| `s`   | Start/stop the timer (timer screen) |
-| `n`   | Add time in the log                 |
-| `/`   | Search projects                     |
-| `Esc` | Close the open form or dialog       |
+| Key     | Action                                       |
+| ------- | -------------------------------------------- |
+| `s`     | Start/stop the timer (timer screen)          |
+| `n`     | Add time in the log                          |
+| `/`     | Search projects                              |
+| `←` `→` | Previous/next week (log) or period (reports) |
+| `g`     | Choose the report grouping                   |
+| `Esc`   | Close the open form or dialog                |
 
 ## API tokens and webhooks
 

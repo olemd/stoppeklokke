@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'preact/hooks';
 import { DialogHost } from './components/Dialog';
 import { Footer } from './components/Footer';
+import { Icon, type IconName } from './components/Icons';
 import { showError, ToastHost } from './components/Toast';
 import { patch } from './lib/api';
 import { time } from './lib/fmt';
@@ -33,13 +34,21 @@ import { SettingsScreen } from './screens/Settings';
 import { TimerScreen } from './screens/Timer';
 import { Wizard } from './screens/Wizard';
 
-const NAV = [
-  { href: '/', key: 'nav.timer' },
-  { href: '/log', key: 'nav.log' },
-  { href: '/reports', key: 'nav.reports' },
-  { href: '/catalog', key: 'nav.catalog' },
-  { href: '/settings', key: 'nav.settings' },
+/**
+ * Desktop: text links in the header. Mobile: a bottom bar of icon + label
+ * tabs; Settings (rarely used on the go) moves to a header icon there so four
+ * tabs get room for their labels. `short` is the mobile label when the full
+ * one is too long for a tab (nb "Stoppeklokke").
+ */
+const NAV: { href: string; key: string; icon: IconName; short?: string }[] = [
+  { href: '/', key: 'nav.timer', icon: 'timer', short: 'nav.timerShort' },
+  { href: '/log', key: 'nav.log', icon: 'log' },
+  { href: '/reports', key: 'nav.reports', icon: 'reports' },
+  { href: '/catalog', key: 'nav.catalog', icon: 'catalog' },
+  { href: '/settings', key: 'nav.settings', icon: 'settings' },
 ];
+const isCurrent = (href: string, path: string) =>
+  href === '/' ? path === '/' : path.startsWith(href);
 
 function WorkspaceSwitcher() {
   if (!multiWorkspace.value) return null;
@@ -85,21 +94,34 @@ function Header() {
     <header class="header">
       <a class="brand" href="/">
         <span class={`brand-dot ${timer.value ? 'on' : ''}`} aria-hidden="true" />
-        {t('app.name')}
+        <span class="brand-name">{t('app.name')}</span>
       </a>
       <WorkspaceSwitcher />
+      <a
+        class="header-settings"
+        href="/settings"
+        aria-label={t('nav.settings')}
+        aria-current={isCurrent('/settings', path) ? 'page' : undefined}
+      >
+        <Icon name="settings" />
+      </a>
       <nav class="nav" aria-label={t('nav.label')}>
         <ul>
-          {NAV.map((n) => {
-            const current = n.href === '/' ? path === '/' : path.startsWith(n.href);
-            return (
-              <li key={n.href}>
-                <a href={n.href} aria-current={current ? 'page' : undefined}>
-                  {t(n.key)}
-                </a>
-              </li>
-            );
-          })}
+          {NAV.map((n) => (
+            <li key={n.href} class={`nav-${n.icon}`}>
+              <a href={n.href} aria-current={isCurrent(n.href, path) ? 'page' : undefined}>
+                <Icon name={n.icon} class="nav-icon" />
+                {n.short ? (
+                  <>
+                    <span class="label-long">{t(n.key)}</span>
+                    <span class="label-short">{t(n.short)}</span>
+                  </>
+                ) : (
+                  <span>{t(n.key)}</span>
+                )}
+              </a>
+            </li>
+          ))}
         </ul>
       </nav>
     </header>
@@ -152,7 +174,11 @@ function Shell({ children, bare = false }: { children: preact.ComponentChildren;
         </p>
       )}
       {!bare && <SyncStatus />}
-      <main id="main" class={bare ? 'main narrow' : 'main'}>
+      {/* Reports get more width on large screens: many currency/day columns. */}
+      <main
+        id="main"
+        class={bare ? 'main narrow' : route.value === '/reports' ? 'main wide' : 'main'}
+      >
         {children}
       </main>
       <Footer />

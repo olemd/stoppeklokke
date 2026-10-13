@@ -4,6 +4,7 @@
  * lock indicators and overlap flags.
  */
 import { useEffect, useState } from 'preact/hooks';
+import { secondsByDay } from '../../core/time/duration';
 import { addDays, dateOf, isoWeek, startOfWeek } from '../../core/time/tz';
 import { formatCalendarDate } from '../../core/time/format';
 import type { Entry } from '../../shared/schemas';
@@ -15,7 +16,7 @@ import { entryColor, entryLabel, hm, rate, time } from '../lib/fmt';
 import { withConflicts } from '../lib/flows';
 import { t, translator } from '../lib/i18n';
 import { navigate, query } from '../lib/router';
-import { ESCAPE_EVENT } from '../lib/shortcuts';
+import { ESCAPE_EVENT, useScreenKeys } from '../lib/shortcuts';
 import {
   activeWorkspaceId,
   filterWorkspaceId,
@@ -42,13 +43,21 @@ export function LogScreen() {
     addEventListener(ESCAPE_EVENT, close);
     return () => removeEventListener(ESCAPE_EVENT, close);
   }, []);
+  useScreenKeys({
+    ArrowLeft: () => navigate(`/log?week=${addDays(week, -7)}`),
+    ArrowRight: () => navigate(`/log?week=${addDays(week, 7)}`),
+  });
   const [locks, setLocks] = useState<Map<number, string>>(new Map());
   const [selected, setSelected] = useState<Set<number>>(new Set());
+  // Phones hide the multi-select checkboxes (a desktop task) until "Select".
+  const [selecting, setSelecting] = useState(false);
 
   const reload = async () => {
     try {
+      // From the Sunday before: an entry crossing into Monday counts in this
+      // week's totals (midnight split, as in reports); it is listed in the week it started.
       const list = await get<Entry[]>(
-        `/entries${qs({ from: week, to: addDays(week, 6), workspace_id: filterWorkspaceId.value })}`,
+        `/entries${qs({ from: addDays(week, -1), to: addDays(week, 6), workspace_id: filterWorkspaceId.value })}`,
       );
       setEntries(list);
       if (list.some((e) => e.period_lock_id !== null)) {
@@ -110,21 +119,22 @@ export function LogScreen() {
     }
   };
 
-  const weekTotal = (entries ?? []).reduce(
-    (a, e) => a + ((e.end_at ?? Math.floor(Date.now() / 1000)) - e.start_at),
-    0,
-  );
+  // Day and week totals split entries at midnight, like the timer and reports.
+  const byDay = secondsByDay(entries ?? [], tz, Math.floor(Date.now() / 1000));
+  const weekTotal = days.reduce((a, d) => a + (byDay.get(d) ?? 0), 0);
+  const listed = (entries ?? []).filter((e) => days.includes(dateOf(e.start_at, tz)));
   const wk = isoWeek(week);
   const loc = { locale: translator.value.locale };
 
   return (
-    <div class="log-screen stack">
+    <div class={`log-screen stack${selecting ? ' selecting' : ''}`}>
       <div class="page-head">
         <h1 tabIndex={-1}>{t('log.week', { week: wk.week })}</h1>
         <nav class="week-nav" aria-label={t('log.title')}>
           <button
             type="button"
             class="btn plain small"
+            aria-keyshortcuts="ArrowLeft"
             onClick={() => navigate(`/log?week=${addDays(week, -7)}`)}
           >
             <span aria-hidden="true">‹ </span>
@@ -138,12 +148,24 @@ export function LogScreen() {
           <button
             type="button"
             class="btn plain small"
+            aria-keyshortcuts="ArrowRight"
             onClick={() => navigate(`/log?week=${addDays(week, 7)}`)}
           >
             {t('log.nextWeek')}
             <span aria-hidden="true"> ›</span>
           </button>
         </nav>
+        <button
+          type="button"
+          class="btn plain select-toggle"
+          aria-pressed={selecting}
+          onClick={() => {
+            if (selecting) setSelected(new Set());
+            setSelecting(!selecting);
+          }}
+        >
+          {t('bulk.choose')}
+        </button>
         <button
           type="button"
           class="btn primary"
@@ -187,18 +209,15 @@ export function LogScreen() {
 
       {entries === null ? (
         <p>{t('app.loading')}</p>
-      ) : entries.length === 0 ? (
+      ) : listed.length === 0 ? (
         <p class="empty">{t('log.empty')}</p>
       ) : (
         days.map((day) => {
-          const list = entries
+          const list = listed
             .filter((e) => dateOf(e.start_at, tz) === day)
             .sort((a, b) => a.start_at - b.start_at);
           if (!list.length) return null;
-          const total = list.reduce(
-            (a, e) => a + ((e.end_at ?? Math.floor(Date.now() / 1000)) - e.start_at),
-            0,
-          );
+          const total = byDay.get(day) ?? 0;
           return (
             <section class="day" key={day} aria-labelledby={`day-${day}`}>
               <div class="day-head">

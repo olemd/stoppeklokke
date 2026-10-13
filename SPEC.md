@@ -386,7 +386,7 @@ GET    /api/openapi.json
 **Entry validation**
 - `end_at > start_at`. Max duration 24 h per entry (overridable with `force: true`; the UI asks "are you sure").
 - Overlapping entries are allowed but flagged in the UI and in reports. Not blocked, since it is often intentional.
-- Start/end may not be more than 5 min in the future.
+- Start/end may not be more than 2 h in the future, so work planned for later today can be logged. A running timer's start may be at most 5 min ahead (clock skew only), since it counts up from the start.
 
 **Timer edge cases**
 - A timer running past midnight is never split or stopped automatically (apart from `idle_stop_after_min`). Reports split it across days (§9).
@@ -397,16 +397,16 @@ GET    /api/openapi.json
 ## 7. Frontend / PWA
 
 ### 7.1 Screens
-1. **Timer (home):** Big start/stop button; the running entry's project, description and start time are editable in place while it runs, client/project picker (searchable, recently used first), description field with autocomplete. Running time ticks locally (computed from `start_at`, not polled). Below: today's entries grouped, with the daily total and progress towards `daily_target_min` (total, plus per-workspace bars when more than one workspace has a target). "Continue" button per entry.
+1. **Timer (home):** Big start/stop button; the running entry's project, description and start time are editable in place while it runs (start time and Discard behind the "Started HH:MM" disclosure, so today's list stays near the top on a phone), client/project picker (searchable, recently used first), description field with autocomplete. Running time ticks locally (computed from `start_at`, not polled). Below: today's entries grouped, with the daily total and progress towards `daily_target_min` (total, plus per-workspace bars when more than one workspace has a target). "Continue" button per entry.
    **Autocomplete:** suggestions ranked by recency and frequency over the last 90 days, scoped to the selected project first, then global. Picking a suggestion also selects the client/project last used with that description if none is selected. Debounced 150 ms; max 10 results; case-insensitive prefix match first, then substring.
 2. **Log:** Week view, entries per day, inline editing of time/description/project. Manual entry ("+ add") with start/end or start/duration. Padlock icon on period-locked entries (read-only) and a separate icon for rate locks (tooltip with the frozen rate). Multi-select for rate lock/release.
-3. **Reports:** Workspace filter (active / specific / all); with "all" the default grouping is by workspace. Period picker (this week, last week, this month, last month, this year, custom); defaults to this week. Group by client/project/day/week/month. Shows hours, billable hours, amount per currency; for a period of at most 7 days grouped by workspace/client/project, the table also has one column per day (timesheet view, midnight-split like the chart) with per-day totals. Filter "locked / unlocked / all" (unlocked = "not invoiced yet"). "Lock period" button using the current period and filters as the starting point. List of period locks with notes and unlock. Simple per-day bar chart (inline SVG, no chart library). CSV export.
+3. **Reports:** Workspace filter (active / specific / all); with "all" the default grouping is by workspace. Period picker (this week, last week, this month, last month, this year, custom); defaults to this week. ‹/› step to the previous/next period of the same size (whole months by calendar months), showing the dates covered. All filters live in the URL query so a report survives navigation and can be bookmarked; presets are stored by name (stay relative), custom periods by date. Group by client/project/day/week/month. Shows hours, billable hours, amount per currency; for a period of at most 7 days grouped by workspace/client/project, the table also has one column per day (timesheet view, midnight-split like the chart) with per-day totals. Filter "locked / unlocked / all" (unlocked = "not invoiced yet"). "Lock period" button using the current period and filters as the starting point. List of period locks with notes and unlock. Simple per-day bar chart (inline SVG, no chart library). CSV export.
 4. **Workspaces, clients and projects:** CRUD for all three (workspaces section only shown with more than one, plus an "Add workspace" button), moving clients between workspaces, colours, rates (with inherited placeholder), notification overrides, archiving.
 5. **Settings:** All settings from §4.3 (time zone/language/currency/clock format at the top), passkeys, push subscriptions per device (+ test button), API tokens, webhooks, data export/import, log out everywhere.
 6. **Footer (every page, including login):** "Stoppeklokke vX.Y.Z · Source code (AGPL-3.0)" linking to `SOURCE_URL`. Version and git SHA are baked in at build time.
 
 ### 7.2 PWA
-- `manifest.webmanifest` with name, icons (192/512 + maskable), `display: standalone`, `start_url: /`. Manifest name/description localised per build default (`en`).
+- `manifest.webmanifest` with name, icons (192/512 + maskable), `display: standalone`, `start_url: /`. App shortcuts (long-press the icon): "Start or stop the timer" (`/?action=toggle`, acted on only in standalone mode) and "Add time" (`/log?new=1`). Manifest name/description localised per build default (`en`).
 - Service worker: precache the app shell (hand-written or a minimal Vite plugin; avoid Workbox bloat). Network-first for `/api/*`, cache fallback for GET.
 - Push handler in the SW: shows the notification with actions **"Stop"** and **"Keep going"**. "Stop" calls `/api/timer/stop` directly from the SW (cookie is sent; same-origin POST includes `Origin`) and shows a confirmation.
 - iOS: Web Push requires the app to be added to the home screen, and the installed PWA has its own cookie jar (log in once inside it). Show an explanation in settings when `Notification` is unavailable.
@@ -416,7 +416,7 @@ GET    /api/openapi.json
 - Everything else requires a connection in v1.
 
 ### 7.4 Keyboard shortcuts (desktop)
-`s` start/stop, `n` new manual entry, `/` focus project picker, `Esc` close.
+`s` start/stop, `n` new manual entry, `/` focus project picker, `Esc` close. `←`/`→` previous/next week in the log and previous/next period in reports; `g` focuses the report grouping.
 
 ### 7.5 Internationalisation
 - Translations live in `src/shared/i18n/<locale>.json` (shared by web **and** worker, because push notification text and CSV headers are generated server-side).

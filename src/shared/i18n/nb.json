@@ -15,6 +15,7 @@
   "nav": {
     "label": "Hovedmeny",
     "timer": "Stoppeklokke",
+    "timerShort": "Klokke",
     "log": "Logg",
     "reports": "Rapporter",
     "catalog": "Prosjekter",
@@ -98,6 +99,7 @@
     "running": "Går",
     "idle": "Står stille",
     "startedAt": "Startet {time}",
+    "adjust": "endre starttid eller forkast",
     "description": "Hva jobber du med?",
     "descriptionLabel": "Beskrivelse",
     "project": "Prosjekt",
@@ -252,6 +254,8 @@
     "lastMonth": "Forrige måned",
     "thisYear": "I år",
     "custom": "Egendefinert",
+    "prevPeriod": "Forrige periode",
+    "nextPeriod": "Neste periode",
     "from": "Fra",
     "to": "Til",
     "groupBy": "Grupper etter",
@@ -306,6 +310,7 @@
   },
   "invoice": {
     "title": "Fakturagrunnlag",
+    "back": "Tilbake til rapporter",
     "intro": "Se over, lag fakturaen i faktureringssystemet ditt, og lås så perioden med fakturanummeret.",
     "client": "Kunde",
     "chooseClient": "Velg en kunde",
@@ -325,6 +330,7 @@
   },
   "bulk": {
     "select": "Velg {description}",
+    "choose": "Velg",
     "selected": "{count} valgt",
     "rateLock": "Lås timepris",
     "rateUnlock": "Frigjør timepris",

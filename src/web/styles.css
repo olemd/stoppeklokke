@@ -128,6 +128,9 @@ a {
   margin: 0 auto;
   padding: 1.25rem 1rem 6rem;
 }
+.main.wide {
+  max-width: 80rem;
+}
 .main.narrow {
   max-width: 34rem;
   padding-top: 3rem;
@@ -260,9 +263,6 @@ a {
   .nav a {
     text-align: center;
     font-size: 0.875rem;
-  }
-  .ws-switch {
-    margin-inline-start: auto;
   }
 }
 
@@ -516,7 +516,23 @@ details > summary {
   line-height: 1;
 }
 .started {
+  font: inherit;
   color: var(--steel);
+  background: transparent;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  padding: 0.3rem 1rem;
+  min-height: 44px;
+  cursor: pointer;
+}
+/* Start time and Discard, shown from the "Started 10:08" disclosure. */
+.timer-adjust {
+  display: grid;
+  gap: var(--gap);
+  justify-items: start;
+}
+.timer-adjust[hidden] {
+  display: none;
 }
 .timer-fields {
   width: 100%;
@@ -873,8 +889,63 @@ progress.bar.small {
   justify-self: start;
 }
 
-/* Mobile bottom bar: tabs share the width equally and may wrap (long nb labels). */
+/*
+ * Mobile bottom bar: four equal icon + label tabs. Settings lives in the
+ * header there (.header-settings) so the labels fit without wrapping.
+ */
+.header-settings {
+  display: none;
+}
+.nav-icon,
+.header-settings .icon {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+@media (min-width: 48rem) {
+  .nav-icon,
+  .label-short {
+    display: none;
+  }
+}
 @media (max-width: 47.99rem) {
+  .brand {
+    margin-inline-end: auto;
+  }
+  /*
+   * With several workspaces the switcher takes the room the app name had:
+   * the name stays for screen readers, the dot still shows a running timer.
+   */
+  .header:has(.ws-switch) .brand-name {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+  .header:has(.ws-switch) {
+    gap: 0.5rem;
+  }
+  .ws-switch {
+    flex: 1;
+    min-width: 0;
+  }
+  .ws-switch select {
+    max-width: none;
+  }
+  .header-settings {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    min-height: 44px;
+    border-radius: var(--radius-s);
+    color: var(--steel);
+  }
+  .header-settings[aria-current='page'] {
+    color: var(--ink);
+    background: var(--track);
+  }
   .nav ul {
     gap: 0;
   }
@@ -882,15 +953,20 @@ progress.bar.small {
     flex: 1;
     min-width: 0;
   }
+  .nav .nav-settings,
+  .label-long {
+    display: none;
+  }
   .nav a {
-    padding: 0.6rem 0.15rem;
+    padding: 0.4rem 0.15rem;
     font-size: 0.75rem;
-    overflow-wrap: anywhere;
-    hyphens: auto;
     border-radius: 0;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
+    gap: 0.15rem;
+    overflow-wrap: anywhere;
   }
 }
 
@@ -1025,6 +1101,23 @@ progress.bar.small {
     grid-template-areas: 'sel sw main flags time dur act';
   }
 }
+/* Phones show the checkboxes only after "Select" (.selecting). */
+@media (min-width: 48rem) {
+  .select-toggle {
+    display: none;
+  }
+}
+@media (max-width: 47.99rem) {
+  .log-screen:not(.selecting) .entry-row .select {
+    display: none;
+  }
+  .log-screen:not(.selecting) .entry-row.selectable {
+    grid-template-columns: 0.3rem 1fr auto;
+    grid-template-areas:
+      'sw main dur'
+      'sw time act';
+  }
+}
 .bulk-bar {
   position: sticky;
   top: 0.5rem;
@@ -1090,4 +1183,28 @@ code.secret {
 }
 .file-btn.is-disabled {
   opacity: 0.55;
+}
+
+/* "‹ Back to reports" above the invoice basis heading. */
+.back {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-weight: 600;
+}
+
+/* Report period stepper: ‹ › and the dates the period covers. */
+.period-step {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.period-step .btn {
+  min-width: 44px;
+  font-size: 1.2rem;
+  line-height: 1;
+}
+.period-range {
+  color: var(--steel);
+  font-variant-numeric: tabular-nums;
 }

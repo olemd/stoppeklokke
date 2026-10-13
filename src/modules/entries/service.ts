@@ -27,7 +27,16 @@ import {
 import type { Ctx } from '../types';
 
 export const MAX_DURATION = 24 * 3600;
-export const FUTURE_SLACK = 5 * 60;
+/**
+ * How far ahead an entry's start or end may be: enough to log work planned
+ * for later today (a meeting at 14:00, entered at 12:30).
+ */
+export const FUTURE_SLACK = 2 * 3600;
+/**
+ * A running timer counts up from its start, so its start may only be ahead
+ * by clock skew between devices; further ahead would show negative time.
+ */
+export const TIMER_FUTURE_SLACK = 5 * 60;
 
 export interface RefsInput {
   workspace_id?: number | null;
@@ -141,8 +150,13 @@ function assertNotFuture(ctx: Ctx, ...times: (number | null | undefined)[]) {
   const limit = ctx.clock.now() + FUTURE_SLACK;
   for (const t of times) {
     if (t != null && t > limit)
-      throw badRequest('in_future', 'Times may not be more than 5 minutes in the future');
+      throw badRequest('in_future', 'Times may not be more than 2 hours in the future');
   }
+}
+
+function assertTimerNotFuture(ctx: Ctx, start: number) {
+  if (start > ctx.clock.now() + TIMER_FUTURE_SLACK)
+    throw badRequest('in_future', 'A running timer may not start more than 5 minutes from now');
 }
 
 /** end > start, and at most 24 h unless forced (409 so the UI can ask, §6). */
@@ -309,7 +323,7 @@ export async function updateEntry(
   const end = input.end_at ?? entry.end_at;
   assertNotFuture(ctx, input.start_at, input.end_at);
   if (end !== null) assertDuration(start, end, input.force);
-  else if (start > ctx.clock.now() + FUTURE_SLACK) throw badRequest('in_future');
+  else assertTimerNotFuture(ctx, start);
 
   const target = scope ?? {
     workspace_id: entry.workspace_id,
@@ -374,7 +388,7 @@ export async function startTimer(
   const settings = await loadSettings(ctx);
   const scope = await deriveScope(ctx, input, null, settings);
   const start = input.start_at ?? ctx.clock.now();
-  assertNotFuture(ctx, start);
+  assertTimerNotFuture(ctx, start);
   await assertNotLocked(ctx, scope, start);
   const now = ctx.clock.now();
 

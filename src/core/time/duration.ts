@@ -78,6 +78,23 @@ export function splitByDay(
 }
 
 /**
+ * Raw seconds per calendar date in `tz` over many entries, each split at
+ * midnight like the reports (§9). A running entry (`end_at` null) counts up to
+ * `now`. Used for the log's day and week totals.
+ */
+export function secondsByDay(
+  entries: { start_at: number; end_at: number | null }[],
+  tz: string,
+  now: number,
+): Map<string, number> {
+  const out = new Map<string, number>();
+  for (const e of entries)
+    for (const p of splitByDay(e.start_at, e.end_at ?? Math.max(now, e.start_at), tz))
+      out.set(p.date, (out.get(p.date) ?? 0) + p.seconds);
+  return out;
+}
+
+/**
  * Distribute an entry's rounded duration over its day pieces proportionally,
  * keeping the total exact (largest remainder), so split days sum to the entry.
  */
