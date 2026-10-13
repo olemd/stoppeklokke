@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.6.0](https://github.com/olemd/stoppeklokke/compare/stoppeklokke-v0.5.0...stoppeklokke-v0.6.0) (2026-10-13)
+
+
+### Features
+
+* **log:** show multi-select checkboxes on phones only after "Select" ([0db7f1e](https://github.com/olemd/stoppeklokke/commit/0db7f1e60d919c8c85807717192dbd948de0b5e3))
+* **pwa:** app shortcuts to start/stop the timer and add time ([0db7f1e](https://github.com/olemd/stoppeklokke/commit/0db7f1e60d919c8c85807717192dbd948de0b5e3))
+* **reports:** keep report filters in the URL ([0db7f1e](https://github.com/olemd/stoppeklokke/commit/0db7f1e60d919c8c85807717192dbd948de0b5e3))
+* **reports:** step to the previous or next period ([0db7f1e](https://github.com/olemd/stoppeklokke/commit/0db7f1e60d919c8c85807717192dbd948de0b5e3))
+* **reports:** use more width on large screens ([0db7f1e](https://github.com/olemd/stoppeklokke/commit/0db7f1e60d919c8c85807717192dbd948de0b5e3))
+* **timer:** tuck start time and Discard behind "Started 10:08" ([0db7f1e](https://github.com/olemd/stoppeklokke/commit/0db7f1e60d919c8c85807717192dbd948de0b5e3))
+* **web:** arrow keys step weeks and periods, g picks report grouping ([0db7f1e](https://github.com/olemd/stoppeklokke/commit/0db7f1e60d919c8c85807717192dbd948de0b5e3))
+* **web:** compact workspace switcher in the mobile header ([0db7f1e](https://github.com/olemd/stoppeklokke/commit/0db7f1e60d919c8c85807717192dbd948de0b5e3))
+* **web:** icon tabs in the mobile bottom bar, Settings in the header ([0db7f1e](https://github.com/olemd/stoppeklokke/commit/0db7f1e60d919c8c85807717192dbd948de0b5e3))
+
+
+### Bug Fixes
+
+* **entries:** allow entries up to two hours in the future ([0db7f1e](https://github.com/olemd/stoppeklokke/commit/0db7f1e60d919c8c85807717192dbd948de0b5e3))
+* **log:** split day and week totals at midnight like reports ([0db7f1e](https://github.com/olemd/stoppeklokke/commit/0db7f1e60d919c8c85807717192dbd948de0b5e3))
+
 ## [0.5.0](https://github.com/olemd/stoppeklokke/compare/stoppeklokke-v0.4.0...stoppeklokke-v0.5.0) (2026-10-09)
 
 
