@@ -13,21 +13,21 @@
     "@simplewebauthn/server": "^14.0.3",
     "hono": "^4.13.13",
     "preact": "^11",
-    "zod": "^4.6.5"
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@babel/core": "^8",
     "@biomejs/biome": "2.5.15",
-    "@cloudflare/vitest-pool-workers": "^0.22.0",
-    "@cloudflare/workers-types": "^5.20261007.1",
+    "@cloudflare/vitest-pool-workers": "^0.23.0",
+    "@cloudflare/workers-types": "^5.20261018.1",
     "@preact/preset-vite": "^2.10.6",
-    "@types/bun": "^1.4.2",
+    "@types/bun": "^1.4.3",
     "license-checker-rseidelsohn": "^5.0.1",
-    "playwright": "1.63.0",
+    "playwright": "1.64.1",
     "typescript": "^7",
-    "vite": "^8.3.3",
+    "vite": "^8.3.4",
     "vitest": "^4.1",
-    "wrangler": "^4.148.0"
+    "wrangler": "^4.151.1"
   },
   "scripts": {
     "gen": "bun scripts/i18n-index.ts",
