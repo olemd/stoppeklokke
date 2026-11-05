@@ -105,7 +105,7 @@ You can choose a fixed answer under **Settings → When a rate changes**. The ru
 
 - Choose a period (this/last week, this/last month, this year or custom; default: this week), a grouping (client, project, day, week, month, or workspace) and filters for billable time and invoicing status (**Not invoiced yet** shows unlocked time only).
 - **‹** and **›** step to the previous or next period of the same size (a month by calendar months). The dates covered are shown next to them.
-- The filters are part of the page address, so you can bookmark a report. A bookmarked preset such as *Last month* always means last month.
+- The filters are part of the page address, so you can bookmark a report. A bookmarked preset such as _Last month_ always means last month.
 - For a week or shorter, grouped by client, project or workspace, the table shows **one column per day** with daily totals at the bottom, like a timesheet.
 - Hours are rounded **per entry** before summing, using the rounding in Settings (or the workspace). Your raw data never changes. Locked periods keep the rounding they were locked with.
 - Amounts are totalled **per currency**. Different currencies are never added or converted.
