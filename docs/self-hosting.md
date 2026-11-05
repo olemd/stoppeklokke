@@ -14,13 +14,13 @@ Stoppeklokke runs on Cloudflare Workers by default ([README](../README.md#deploy
 
 ## Which one should I choose?
 
-| | Cloudflare | Self-hosted |
-|---|---|---|
-| Cost | Free plan | Your server |
-| You operate | Nothing | Server, TLS, backups, updates |
-| Data lives in | Your Cloudflare account (D1) | One SQLite file on your disk |
-| Limits | 10 ms CPU per request, 100k requests/day | None that matter for one person |
-| Deploys | Push to `main` | Pull a new image (or rebuild) |
+|               | Cloudflare                               | Self-hosted                     |
+| ------------- | ---------------------------------------- | ------------------------------- |
+| Cost          | Free plan                                | Your server                     |
+| You operate   | Nothing                                  | Server, TLS, backups, updates   |
+| Data lives in | Your Cloudflare account (D1)             | One SQLite file on your disk    |
+| Limits        | 10 ms CPU per request, 100k requests/day | None that matter for one person |
+| Deploys       | Push to `main`                           | Pull a new image (or rebuild)   |
 
 Both can live side by side in one fork; nothing in the code has to change.
 
@@ -127,19 +127,19 @@ For Caddy on the same host as option B, the default `127.0.0.1,::1` is right. Wi
 
 ## Configuration reference
 
-| Variable | Required | Default | Meaning |
-|---|---|---|---|
-| `ORIGIN` | yes | | Public address, e.g. `https://stoppeklokke.example.com` (no trailing slash) |
-| `RP_ID` | yes | | Passkey domain: the host of `ORIGIN`. Passkeys are bound to it |
-| `SETUP_TOKEN` | for setup | | One-time token for `/setup?token=…`, ≥ 16 characters |
-| `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` | for push | | Web Push keys; all three or none |
-| `TRUSTED_PROXIES` | behind a proxy | (none) | See [above](#reverse-proxy-and-client-addresses) |
-| `SOURCE_URL` | | upstream repo | Source link in the footer. Must point at your fork if you modify the code (AGPL §13) |
-| `PORT` | | `8787` | Listening port |
-| `HOST` | | `127.0.0.1` (image: `0.0.0.0`) | Listening address |
-| `DATABASE_PATH` | | `./data/stoppeklokke.sqlite` (image: `/data/stoppeklokke.sqlite`) | SQLite file; created if missing |
-| `STATIC_DIR` | | `./dist/web` (image: `/app/web`) | Built PWA |
-| `MIGRATIONS_DIR` | | `./migrations` (image: `/app/migrations`) | SQL migrations, applied at startup |
+| Variable                                                 | Required       | Default                                                           | Meaning                                                                              |
+| -------------------------------------------------------- | -------------- | ----------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| `ORIGIN`                                                 | yes            |                                                                   | Public address, e.g. `https://stoppeklokke.example.com` (no trailing slash)          |
+| `RP_ID`                                                  | yes            |                                                                   | Passkey domain: the host of `ORIGIN`. Passkeys are bound to it                       |
+| `SETUP_TOKEN`                                            | for setup      |                                                                   | One-time token for `/setup?token=…`, ≥ 16 characters                                 |
+| `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` | for push       |                                                                   | Web Push keys; all three or none                                                     |
+| `TRUSTED_PROXIES`                                        | behind a proxy | (none)                                                            | See [above](#reverse-proxy-and-client-addresses)                                     |
+| `SOURCE_URL`                                             |                | upstream repo                                                     | Source link in the footer. Must point at your fork if you modify the code (AGPL §13) |
+| `PORT`                                                   |                | `8787`                                                            | Listening port                                                                       |
+| `HOST`                                                   |                | `127.0.0.1` (image: `0.0.0.0`)                                    | Listening address                                                                    |
+| `DATABASE_PATH`                                          |                | `./data/stoppeklokke.sqlite` (image: `/data/stoppeklokke.sqlite`) | SQLite file; created if missing                                                      |
+| `STATIC_DIR`                                             |                | `./dist/web` (image: `/app/web`)                                  | Built PWA                                                                            |
+| `MIGRATIONS_DIR`                                         |                | `./migrations` (image: `/app/migrations`)                         | SQL migrations, applied at startup                                                   |
 
 `GET /api/health` reports `config_errors` if something is missing or inconsistent (for example an `RP_ID` that does not match `ORIGIN`).
 
