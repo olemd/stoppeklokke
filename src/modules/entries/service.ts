@@ -227,6 +227,7 @@ const INSERT_ENTRY = `INSERT INTO time_entries
 function defaultBillable(scope: Scope, settings: Settings): boolean {
   return resolveSetting('billable_default', {
     project: scope.project,
+    client: scope.client,
     workspace: scope.workspace,
     settings,
   });

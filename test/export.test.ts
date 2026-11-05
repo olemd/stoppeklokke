@@ -201,6 +201,45 @@ describe('export/import round trip (§13)', () => {
     expect(again.counts.time_entries).toBe(1200);
   });
 
+  it('imports rows exported before a nullable column was added', async () => {
+    await resetDb();
+    const fresh = await authed();
+    const ws = {
+      id: 1,
+      name: 'Work',
+      color: '#888888',
+      currency: null,
+      default_hourly_rate: null,
+      billable_default: null,
+      rounding_min: null,
+      rounding_mode: null,
+      daily_target_min: null,
+      alert_after_min: null,
+      tick_interval_min: null,
+      on_rate_change: null,
+      sort_order: 0,
+      archived: 0,
+      created_at: 0,
+      updated_at: 0,
+    };
+    // A clients row from before migration 0005: no billable_default key at all.
+    const client = {
+      id: 1,
+      workspace_id: 1,
+      name: 'Old',
+      hourly_rate: null,
+      currency: null,
+      archived: 0,
+      created_at: 0,
+      updated_at: 0,
+    };
+    await importAll(fresh, { data: { workspaces: [ws], clients: [client] } });
+    expect((await call(fresh, 'GET', '/api/clients', undefined, 200))[0]).toMatchObject({
+      name: 'Old',
+      billable_default: null,
+    });
+  });
+
   it('rejects malformed rows atomically', async () => {
     await resetDb();
     const fresh = await authed();

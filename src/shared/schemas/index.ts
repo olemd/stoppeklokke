@@ -75,6 +75,7 @@ export const Client = z.object({
   name: z.string(),
   hourly_rate: z.number().nullable(),
   currency: z.string().nullable(),
+  billable_default: z.boolean().nullable(),
   archived: z.boolean(),
   created_at: z.number(),
   updated_at: z.number(),
@@ -86,11 +87,13 @@ export const ClientCreate = z.object({
   name: Name,
   hourly_rate: Rate.optional(),
   currency: Currency.nullable().optional(),
+  billable_default: z.boolean().nullable().optional(),
 });
 export const ClientPatch = z.object({
   name: Name.optional(),
   hourly_rate: Rate.optional(),
   currency: Currency.nullable().optional(),
+  billable_default: z.boolean().nullable().optional(),
   archived: z.boolean().optional(),
   rate_change: RateChange.optional(),
 });

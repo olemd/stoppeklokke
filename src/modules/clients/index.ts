@@ -1,16 +1,20 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-/** Clients (§4): belong to a workspace; optional rate/currency overrides. */
+/** Clients (§4): belong to a workspace; optional rate/currency/billable overrides. */
 import { createRoute, z } from '@hono/zod-openapi';
 import { conflict } from '../../core/errors';
 import type { ClientRow } from '../../core/model';
 import { Client, ClientCreate, ClientPatch, Id } from '../../shared/schemas';
 import { uniqueName } from '../data/errors';
 import { activeWorkspaceId, loadSettings, requireClient, requireWorkspace } from '../data/repo';
-import { bit, body, json, setClause } from '../http';
+import { bit, body, bool, json, setClause } from '../http';
 import { planRateChange, runWithPlan } from '../rates/change';
 import type { Module } from '../types';
 
-export const toClient = (r: ClientRow): Client => ({ ...r, archived: r.archived === 1 });
+export const toClient = (r: ClientRow): Client => ({
+  ...r,
+  billable_default: bool(r.billable_default),
+  archived: r.archived === 1,
+});
 
 const IdParam = z.object({ id: Id });
 const Ok = z.object({ ok: z.literal(true) });
@@ -55,12 +59,13 @@ export const clientsModule: Module = {
         const now = ctx.clock.now();
         const row = await uniqueName(
           ctx.db.first<ClientRow>(
-            `INSERT INTO clients (workspace_id, name, hourly_rate, currency, created_at, updated_at)
-             VALUES (?, ?, ?, ?, ?, ?) RETURNING *`,
+            `INSERT INTO clients (workspace_id, name, hourly_rate, currency, billable_default, created_at, updated_at)
+             VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING *`,
             workspaceId,
             input.name,
             input.hourly_rate ?? null,
             input.currency ?? null,
+            bit(input.billable_default) ?? null,
             now,
             now,
           ),
@@ -98,9 +103,10 @@ export const clientsModule: Module = {
             name: input.name,
             hourly_rate: input.hourly_rate,
             currency: input.currency,
+            billable_default: bit(input.billable_default),
             archived: bit(input.archived),
           },
-          ['name', 'hourly_rate', 'currency', 'archived'],
+          ['name', 'hourly_rate', 'currency', 'billable_default', 'archived'],
         );
         const update = sql
           ? [

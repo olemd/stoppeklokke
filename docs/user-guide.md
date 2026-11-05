@@ -77,7 +77,7 @@ Entries cannot be more than 2 hours in the future (a running timer: 5 minutes). 
 - **Clients** have projects. A project without a client is **internal** (admin, training, …).
 - You can also track time against a client without a project, or against nothing at all (**Uncategorised**).
 - **Archive** hides a client or project from the pickers but keeps it in reports.
-- Each project has a colour and optional overrides for billable default, the long-session alert and the reminder interval.
+- Each project has a colour and optional overrides for billable default, the long-session alert and the reminder interval. A client can also override the billable default (e.g. an employer whose time is never invoiced); the chain is project → client → workspace → Settings.
 
 **Workspaces** separate your roles: self-employed, an employer, board work, … Each has its own clients, projects, rates, rounding and daily target. The timer, notifications, time zone and language are shared. With a single workspace you never see any of this. Add one under **Projects → Add workspace**; a switcher then appears in the header. Moving a client to another workspace moves its projects and time with it (not possible once some of its time is locked).
 

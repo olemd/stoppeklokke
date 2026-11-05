@@ -133,7 +133,7 @@ describe('timer', () => {
     expect((await call(h, 'GET', '/api/settings')).active_workspace_id).toBe(ws);
   });
 
-  it('applies billable defaults: project overrides workspace', async () => {
+  it('applies billable defaults: project → client → workspace', async () => {
     const off = (
       await call(h, 'POST', '/api/workspaces', { name: 'Off', billable_default: false }, 201)
     ).id;
@@ -150,6 +150,55 @@ describe('timer', () => {
     h.clock.advance(60);
     expect(
       (await call(h, 'POST', '/api/timer/start', { project_id: p.id }, 200)).entry.billable,
+    ).toBe(true);
+
+    // Client level, in a workspace where the default is on.
+    const pro = await call(
+      h,
+      'POST',
+      '/api/clients',
+      { name: 'Pro bono', billable_default: false },
+      201,
+    );
+    expect(pro.billable_default).toBe(false);
+    h.clock.advance(60);
+    expect(
+      (await call(h, 'POST', '/api/timer/start', { client_id: pro.id }, 200)).entry.billable,
+    ).toBe(false);
+    // A project under that client inherits the client's value …
+    const inherit = await call(
+      h,
+      'POST',
+      '/api/projects',
+      { client_id: pro.id, name: 'Inherits' },
+      201,
+    );
+    h.clock.advance(60);
+    expect(
+      (await call(h, 'POST', '/api/timer/start', { project_id: inherit.id }, 200)).entry.billable,
+    ).toBe(false);
+    // … unless it overrides it, and an explicit billable flag always wins.
+    const paid = await call(
+      h,
+      'POST',
+      '/api/projects',
+      { client_id: pro.id, name: 'Paid', billable_default: true },
+      201,
+    );
+    h.clock.advance(60);
+    expect(
+      (await call(h, 'POST', '/api/timer/start', { project_id: paid.id }, 200)).entry.billable,
+    ).toBe(true);
+    h.clock.advance(60);
+    expect(
+      (await call(h, 'POST', '/api/timer/start', { client_id: pro.id, billable: true }, 200)).entry
+        .billable,
+    ).toBe(true);
+    // Clearing the override (null) goes back to inheriting from the workspace.
+    await call(h, 'PATCH', `/api/clients/${pro.id}`, { billable_default: null }, 200);
+    h.clock.advance(60);
+    expect(
+      (await call(h, 'POST', '/api/timer/start', { client_id: pro.id }, 200)).entry.billable,
     ).toBe(true);
   });
 

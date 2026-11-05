@@ -65,6 +65,7 @@ const TABLES: TableSpec[] = [
       name: 'text',
       hourly_rate: 'int?',
       currency: 'text?',
+      billable_default: 'int?',
       archived: 'int',
       created_at: 'int',
       updated_at: 'int',
@@ -133,9 +134,11 @@ const TABLES: TableSpec[] = [
   },
 ];
 
+// Nullable columns may also be missing, so an export taken before a column
+// was added (expand-only migrations) still imports; a missing value is NULL.
 const zodFor = (c: Col) => {
   const base = c.startsWith('int') ? z.number().int() : z.string().max(10_000);
-  return c.endsWith('?') ? base.nullable() : base;
+  return c.endsWith('?') ? base.nullable().optional() : base;
 };
 
 function collection(t: TableSpec): ExportCollection {
