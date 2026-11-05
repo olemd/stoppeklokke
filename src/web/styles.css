@@ -291,14 +291,24 @@ a {
   flex-direction: column;
   gap: 0.3rem;
   min-width: 0;
+  /* <fieldset> reset; margin-block stays so `.stack > * + *` applies. */
   border: 0;
   padding: 0;
-  margin: 0;
+  margin-inline: 0;
 }
 .field > label,
 .field > legend {
   font-weight: 600;
   font-size: 0.9rem;
+}
+/* A legend is not a flex item, so the field's gap does not reach it. */
+.field > legend {
+  padding: 0;
+  margin-bottom: 0.3rem;
+}
+/* A group of fields (e.g. a project's notification overrides). */
+.field.group > legend {
+  font-size: 1rem;
 }
 input:not([type='checkbox'], [type='radio'], [type='color']),
 select {

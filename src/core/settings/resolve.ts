@@ -6,26 +6,32 @@
  * Only keys that have override columns are looked up on project/client/workspace;
  * everything else comes straight from global settings.
  */
-import type { ClientRow, ProjectRow, WorkspaceRow } from '../model';
 import type { RoundingMode } from '../time/duration';
 import type { Settings } from './defs';
 
+/** A stored 0/1 (rows) or a decoded boolean (API objects); NULL = inherit. */
+type Bit = number | boolean | null;
+
+/** Rows from the database or objects from the API: both shapes resolve the same. */
 export interface SettingScope {
-  project?: Pick<ProjectRow, 'billable_default' | 'alert_after_min' | 'tick_interval_min'> | null;
-  client?: Pick<ClientRow, 'billable_default'> | null;
-  workspace?: Pick<
-    WorkspaceRow,
-    | 'currency'
-    | 'default_hourly_rate'
-    | 'billable_default'
-    | 'rounding_min'
-    | 'rounding_mode'
-    | 'daily_target_min'
-    | 'alert_after_min'
-    | 'tick_interval_min'
-    | 'on_rate_change'
-  > | null;
-  settings: Settings;
+  project?: {
+    billable_default: Bit;
+    alert_after_min: number | null;
+    tick_interval_min: number | null;
+  } | null;
+  client?: { billable_default: Bit } | null;
+  workspace?: {
+    currency: string | null;
+    default_hourly_rate: number | null;
+    billable_default: Bit;
+    rounding_min: number | null;
+    rounding_mode: string | null;
+    daily_target_min: number | null;
+    alert_after_min: number | null;
+    tick_interval_min: number | null;
+    on_rate_change: string | null;
+  } | null;
+  settings: Pick<Settings, ResolvableKey>;
 }
 
 /** Keys overridable per project (columns on `projects`). */
