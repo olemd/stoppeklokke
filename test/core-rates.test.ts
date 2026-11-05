@@ -83,7 +83,7 @@ describe('resolveSetting', () => {
     on_rate_change: null,
   };
 
-  it('uses project → workspace → global → default', () => {
+  it('uses project → client → workspace → global → default', () => {
     expect(resolveSetting('billable_default', { workspace: W, settings })).toBe(false);
     expect(
       resolveSetting('billable_default', {
@@ -92,6 +92,37 @@ describe('resolveSetting', () => {
         settings,
       }),
     ).toBe(true);
+    // Client overrides workspace; project overrides client; NULL client inherits.
+    expect(
+      resolveSetting('billable_default', {
+        client: { billable_default: 1 },
+        workspace: W,
+        settings,
+      }),
+    ).toBe(true);
+    expect(
+      resolveSetting('billable_default', {
+        project: { billable_default: 0, alert_after_min: null, tick_interval_min: null },
+        client: { billable_default: 1 },
+        workspace: W,
+        settings,
+      }),
+    ).toBe(false);
+    expect(
+      resolveSetting('billable_default', {
+        project: { billable_default: null, alert_after_min: null, tick_interval_min: null },
+        client: { billable_default: null },
+        workspace: W,
+        settings,
+      }),
+    ).toBe(false);
+    expect(
+      resolveSetting('alert_after_min', {
+        client: { billable_default: 1, alert_after_min: 5 } as never,
+        workspace: W,
+        settings,
+      }),
+    ).toBe(120);
     expect(resolveSetting('rounding_min', { workspace: W, settings })).toBe(15);
     expect(resolveSetting('rounding_mode', { workspace: W, settings })).toBe('nearest');
     expect(resolveSetting('alert_after_min', { workspace: W, settings })).toBe(120);

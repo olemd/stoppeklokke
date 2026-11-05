@@ -140,6 +140,9 @@ function ClientEditor({
     currency: client?.currency ?? null,
     valid: true,
   });
+  const [billable, setBillable] = useState<'' | 'true' | 'false'>(
+    client?.billable_default == null ? '' : client.billable_default ? 'true' : 'false',
+  );
   const workspace = workspaces.value.find((w) => w.id === workspaceId) ?? null;
   const prefix = client ? `c${client.id}` : 'cnew';
   return (
@@ -148,7 +151,12 @@ function ClientEditor({
       onSubmit={async (e) => {
         e.preventDefault();
         if (!money.valid) return;
-        const body = { name, hourly_rate: money.rate, currency: money.currency };
+        const body = {
+          name,
+          hourly_rate: money.rate,
+          currency: money.currency,
+          billable_default: billable === '' ? null : billable === 'true',
+        };
         const ok = client
           ? await save((x) => patch(`/clients/${client.id}`, { ...body, ...x }))
           : await save(() => post('/clients', { ...body, workspace_id: workspaceId }));
@@ -197,6 +205,18 @@ function ClientEditor({
         parent={{ workspace }}
         onChange={setMoney}
       />
+      <div class="field">
+        <label for={`${prefix}-bill`}>{t('catalog.billableDefault')}</label>
+        <select
+          id={`${prefix}-bill`}
+          value={billable}
+          onChange={(e) => setBillable(e.currentTarget.value as never)}
+        >
+          <option value="">{t('common.inherit')}</option>
+          <option value="true">{t('common.yes')}</option>
+          <option value="false">{t('common.no')}</option>
+        </select>
+      </div>
       <div class="actions">
         {client && (
           <button

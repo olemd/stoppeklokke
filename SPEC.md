@@ -93,6 +93,7 @@ CREATE TABLE clients (
   name          TEXT NOT NULL,
   hourly_rate   INTEGER,              -- minor units (cents/øre); NULL = inherit from workspace
   currency      TEXT,                 -- NULL = inherit from workspace
+  billable_default INTEGER,           -- NULL = inherit from workspace
   archived      INTEGER NOT NULL DEFAULT 0,
   created_at    INTEGER NOT NULL,
   updated_at    INTEGER NOT NULL,
@@ -107,7 +108,7 @@ CREATE TABLE projects (
   color                 TEXT NOT NULL DEFAULT '#4f7cff',
   hourly_rate           INTEGER,      -- minor units; NULL = inherit from client
   currency              TEXT,         -- NULL = inherit from client
-  billable_default      INTEGER,      -- NULL = inherit from workspace
+  billable_default      INTEGER,      -- NULL = inherit from client
   alert_after_min       INTEGER,      -- NULL = inherit from workspace
   tick_interval_min     INTEGER,      -- NULL = inherit from workspace; 0 = off
   archived              INTEGER NOT NULL DEFAULT 0,
@@ -259,7 +260,7 @@ Applies when the rate **or** currency changes at project, client, workspace or g
 
 ### 4.3 Settings
 
-Key/value in `settings`, with defaults in code. Settings marked **W** can be overridden per workspace (and some further per project, see schema); the chain is always the most specific non-NULL value. All inheritance goes through one pure `resolveSetting(key, {project, client, workspace, settings})` in `core/`.
+Key/value in `settings`, with defaults in code. Settings marked **W** can be overridden per workspace (and some further per client and project, see schema); the chain is always the most specific non-NULL value (project → client → workspace → global). All inheritance goes through one pure `resolveSetting(key, {project, client, workspace, settings})` in `core/`.
 
 **Overrides:** `timezone`, `locale`, `currency` and `clock_format` are shown in the setup wizard, prefilled with the suggestions below, and can be changed there and later in settings. After setup the browser is **never** consulted again for these; the stored value wins. Validated server-side: `timezone` against `Intl.supportedValuesOf('timeZone')`, `currency` against ISO 4217 (`Intl.supportedValuesOf('currency')`), `locale` against the available translations.
 
@@ -278,7 +279,7 @@ Key/value in `settings`, with defaults in code. Settings marked **W** can be ove
 | `rounding_min` **W** | `0` | Rounding in reports: 0, 5, 6, 10, 15, 30 |
 | `rounding_mode` **W** | `nearest` | `nearest` / `up` / `down` |
 | `daily_target_min` | `450` | 7:30, total across all workspaces for "today's progress". Each workspace can also have its own target (shown per workspace) |
-| `billable_default` **W** | `1` | Default billable flag for new entries (projects can override) |
+| `billable_default` **W** | `1` | Default billable flag for new entries (clients and projects can override: project → client → workspace) |
 | `idle_stop_after_min` | `0` | Auto-stop after X min; 0 = off (§8.3) |
 
 ### 4.4 Workspaces

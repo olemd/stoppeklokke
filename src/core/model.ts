@@ -26,6 +26,7 @@ export interface ClientRow {
   name: string;
   hourly_rate: number | null;
   currency: string | null;
+  billable_default: number | null;
   archived: number;
   created_at: number;
   updated_at: number;

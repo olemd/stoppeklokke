@@ -104,6 +104,7 @@ describe('clients and projects', () => {
       name: 'Acme',
       hourly_rate: 120000,
       currency: 'EUR',
+      billable_default: null,
     });
     expect((await h.json('/api/clients', { method: 'POST', json: { name: 'Acme' } })).status).toBe(
       409,
