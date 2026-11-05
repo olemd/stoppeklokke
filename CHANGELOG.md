@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.1](https://github.com/olemd/stoppeklokke/compare/stoppeklokke-v0.7.0...stoppeklokke-v0.7.1) (2026-11-05)
+
+
+### Bug Fixes
+
+* **web:** consistent override fields in the project, client and workspace editors ([#24](https://github.com/olemd/stoppeklokke/issues/24)) ([d0eed39](https://github.com/olemd/stoppeklokke/commit/d0eed394870bfcedd234bd7409b2d4acc3af0b6e))
+
 ## [0.7.0](https://github.com/olemd/stoppeklokke/compare/stoppeklokke-v0.6.0...stoppeklokke-v0.7.0) (2026-11-05)
 
 
