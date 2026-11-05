@@ -1,11 +1,14 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 /**
- * Workspaces, clients and projects (§7.1 #4). Rates show the inherited value
- * as a placeholder; clearing a field means "inherit", 0 is an explicit rate.
+ * Workspaces, clients and projects (§7.1 #4). Every override field shows the
+ * value it would inherit (§4.3) as a placeholder; clearing a field means
+ * "inherit", 0 is an explicit value. The three editors share one layout:
+ * name, rate/currency, billable default, then the level's own fields.
  * The workspaces section only appears with more than one workspace.
  */
 import { useState } from 'preact/hooks';
 import { resolveRate, type RateSource } from '../../core/rates/resolve';
+import { resolveSetting } from '../../core/settings/resolve';
 import type { Client, Project, Workspace } from '../../shared/schemas';
 import { showError, toast } from '../components/Toast';
 import { patch, post } from '../lib/api';
@@ -44,6 +47,53 @@ function inheritedPlaceholder(parent: { client?: Client | null; workspace?: Work
             rate: fmtRate(r.rate, r.currency),
           }),
   };
+}
+
+/** What a level inherits for its overridable settings (§4.3), for placeholders. */
+function inheritedSettings(parent: { client?: Client | null; workspace?: Workspace | null }) {
+  const scope = {
+    client: parent.client ?? null,
+    workspace: parent.workspace ?? null,
+    settings: settings.value!,
+  };
+  return {
+    billable: resolveSetting('billable_default', scope),
+    alert: resolveSetting('alert_after_min', scope),
+    tick: resolveSetting('tick_interval_min', scope),
+    target: resolveSetting('daily_target_min', scope),
+  };
+}
+
+const minutesHint = (n: number) =>
+  t('common.inheritValue', { value: n === 0 ? t('common.off') : `${n} ${t('settings.minutes')}` });
+
+type Tri = '' | 'true' | 'false';
+const tri = (v: boolean | null | undefined): Tri => (v == null ? '' : v ? 'true' : 'false');
+
+/** Inherit / yes / no for a billable-default override; "inherit" says what it resolves to. */
+function BillableSelect({
+  id,
+  value,
+  inherited,
+  onChange,
+}: {
+  id: string;
+  value: Tri;
+  inherited: boolean;
+  onChange: (v: Tri) => void;
+}) {
+  return (
+    <div class="field">
+      <label for={id}>{t('catalog.billableDefault')}</label>
+      <select id={id} value={value} onChange={(e) => onChange(e.currentTarget.value as Tri)}>
+        <option value="">
+          {t('common.inheritValue', { value: t(inherited ? 'common.yes' : 'common.no') })}
+        </option>
+        <option value="true">{t('common.yes')}</option>
+        <option value="false">{t('common.no')}</option>
+      </select>
+    </div>
+  );
 }
 
 async function save<T>(fn: (extra: Record<string, unknown>) => Promise<T>) {
@@ -140,10 +190,9 @@ function ClientEditor({
     currency: client?.currency ?? null,
     valid: true,
   });
-  const [billable, setBillable] = useState<'' | 'true' | 'false'>(
-    client?.billable_default == null ? '' : client.billable_default ? 'true' : 'false',
-  );
+  const [billable, setBillable] = useState<Tri>(tri(client?.billable_default));
   const workspace = workspaces.value.find((w) => w.id === workspaceId) ?? null;
+  const inh = inheritedSettings({ workspace });
   const prefix = client ? `c${client.id}` : 'cnew';
   return (
     <form
@@ -205,18 +254,12 @@ function ClientEditor({
         parent={{ workspace }}
         onChange={setMoney}
       />
-      <div class="field">
-        <label for={`${prefix}-bill`}>{t('catalog.billableDefault')}</label>
-        <select
-          id={`${prefix}-bill`}
-          value={billable}
-          onChange={(e) => setBillable(e.currentTarget.value as never)}
-        >
-          <option value="">{t('common.inherit')}</option>
-          <option value="true">{t('common.yes')}</option>
-          <option value="false">{t('common.no')}</option>
-        </select>
-      </div>
+      <BillableSelect
+        id={`${prefix}-bill`}
+        value={billable}
+        inherited={inh.billable}
+        onChange={setBillable}
+      />
       <div class="actions">
         {client && (
           <button
@@ -256,13 +299,7 @@ function ProjectEditor({
   const [name, setName] = useState(project?.name ?? '');
   const [color, setColor] = useState(project?.color ?? '#4f7cff');
   const [client, setClient] = useState<number | null>(project ? project.client_id : clientId);
-  const [billable, setBillable] = useState<'' | 'true' | 'false'>(
-    project?.billable_default === null || project === undefined
-      ? ''
-      : project.billable_default
-        ? 'true'
-        : 'false',
-  );
+  const [billable, setBillable] = useState<Tri>(tri(project?.billable_default));
   const [money, setMoney] = useState({
     rate: project?.hourly_rate ?? null,
     currency: project?.currency ?? null,
@@ -272,6 +309,8 @@ function ProjectEditor({
   const [tick, setTick] = useState(project?.tick_interval_min?.toString() ?? '');
   const ws = project?.workspace_id ?? workspaceId;
   const parentClient = clients.value.find((c) => c.id === client) ?? null;
+  const parentWorkspace = workspaces.value.find((w) => w.id === ws) ?? null;
+  const inh = inheritedSettings({ client: parentClient, workspace: parentWorkspace });
   const prefix = project ? `p${project.id}` : `pnew${clientId ?? 'i'}`;
   const num = (v: string) => (v.trim() === '' ? null : Number(v));
   return (
@@ -338,30 +377,24 @@ function ProjectEditor({
         id={prefix}
         rate={money.rate}
         currency={money.currency}
-        parent={{ client: parentClient, workspace: workspaces.value.find((w) => w.id === ws) }}
+        parent={{ client: parentClient, workspace: parentWorkspace }}
         onChange={setMoney}
       />
-      <details>
-        <summary>{t('settings.notifications')}</summary>
-        <div class="grid-3">
-          <div class="field">
-            <label for={`${prefix}-bill`}>{t('catalog.billableDefault')}</label>
-            <select
-              id={`${prefix}-bill`}
-              value={billable}
-              onChange={(e) => setBillable(e.currentTarget.value as never)}
-            >
-              <option value="">{t('common.inherit')}</option>
-              <option value="true">{t('common.yes')}</option>
-              <option value="false">{t('common.no')}</option>
-            </select>
-          </div>
+      <BillableSelect
+        id={`${prefix}-bill`}
+        value={billable}
+        inherited={inh.billable}
+        onChange={setBillable}
+      />
+      <fieldset class="field group">
+        <legend>{t('settings.notifications')}</legend>
+        <div class="grid-2">
           <div class="field">
             <label for={`${prefix}-alert`}>{t('catalog.alertAfter')}</label>
             <input
               id={`${prefix}-alert`}
               inputMode="numeric"
-              placeholder={t('common.inherit')}
+              placeholder={minutesHint(inh.alert)}
               value={alert}
               onInput={(e) => setAlert(e.currentTarget.value)}
             />
@@ -371,13 +404,13 @@ function ProjectEditor({
             <input
               id={`${prefix}-tick`}
               inputMode="numeric"
-              placeholder={t('common.inherit')}
+              placeholder={minutesHint(inh.tick)}
               value={tick}
               onInput={(e) => setTick(e.currentTarget.value)}
             />
           </div>
         </div>
-      </details>
+      </fieldset>
       <div class="actions">
         {project && (
           <button
@@ -411,10 +444,9 @@ function WorkspaceEditor({ workspace, onDone }: { workspace?: Workspace; onDone:
     currency: workspace?.currency ?? null,
     valid: true,
   });
-  const [billable, setBillable] = useState<'' | 'true' | 'false'>(
-    workspace?.billable_default == null ? '' : workspace.billable_default ? 'true' : 'false',
-  );
+  const [billable, setBillable] = useState<Tri>(tri(workspace?.billable_default));
   const [target, setTarget] = useState(workspace?.daily_target_min?.toString() ?? '');
+  const inh = inheritedSettings({});
   const prefix = workspace ? `w${workspace.id}` : 'wnew';
   return (
     <form
@@ -452,29 +484,21 @@ function WorkspaceEditor({ workspace, onDone }: { workspace?: Workspace; onDone:
         parent={{}}
         onChange={setMoney}
       />
-      <div class="grid-2">
-        <div class="field">
-          <label for={`${prefix}-bill`}>{t('catalog.billableDefault')}</label>
-          <select
-            id={`${prefix}-bill`}
-            value={billable}
-            onChange={(e) => setBillable(e.currentTarget.value as never)}
-          >
-            <option value="">{t('common.inherit')}</option>
-            <option value="true">{t('common.yes')}</option>
-            <option value="false">{t('common.no')}</option>
-          </select>
-        </div>
-        <div class="field">
-          <label for={`${prefix}-target`}>{t('catalog.dailyTarget')}</label>
-          <input
-            id={`${prefix}-target`}
-            inputMode="numeric"
-            placeholder={t('common.inherit')}
-            value={target}
-            onInput={(e) => setTarget(e.currentTarget.value)}
-          />
-        </div>
+      <BillableSelect
+        id={`${prefix}-bill`}
+        value={billable}
+        inherited={inh.billable}
+        onChange={setBillable}
+      />
+      <div class="field">
+        <label for={`${prefix}-target`}>{t('catalog.dailyTarget')}</label>
+        <input
+          id={`${prefix}-target`}
+          inputMode="numeric"
+          placeholder={minutesHint(inh.target)}
+          value={target}
+          onInput={(e) => setTarget(e.currentTarget.value)}
+        />
       </div>
       <div class="actions">
         {workspace && activeWorkspaces.value.length > 1 && (
