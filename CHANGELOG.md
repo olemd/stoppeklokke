@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.0](https://github.com/olemd/stoppeklokke/compare/stoppeklokke-v0.6.0...stoppeklokke-v0.7.0) (2026-11-05)
+
+
+### Features
+
+* **clients:** billable default per client ([#21](https://github.com/olemd/stoppeklokke/issues/21)) ([6893f94](https://github.com/olemd/stoppeklokke/commit/6893f94c8bc8ab15c354ac4af91237e805344d8f))
+
 ## [0.6.0](https://github.com/olemd/stoppeklokke/compare/stoppeklokke-v0.5.0...stoppeklokke-v0.6.0) (2026-10-13)
 
 
