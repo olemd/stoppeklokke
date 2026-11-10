@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.0](https://github.com/olemd/stoppeklokke/compare/stoppeklokke-v0.7.1...stoppeklokke-v0.8.0) (2026-11-10)
+
+
+### Features
+
+* **entries:** log any interval in the current day ahead of time ([#26](https://github.com/olemd/stoppeklokke/issues/26)) ([9893268](https://github.com/olemd/stoppeklokke/commit/9893268b04f948cbe9c29ab37a5e0a35403ca936))
+
 ## [0.7.1](https://github.com/olemd/stoppeklokke/compare/stoppeklokke-v0.7.0...stoppeklokke-v0.7.1) (2026-11-05)
 
 
