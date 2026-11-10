@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // Manual entries, derivation, validation and lock rules (§4, §4.1, §6).
 import { beforeEach, describe, expect, it } from 'vitest';
+import { addDays, dateOf, startOfDay } from '../src/core/time/tz';
 import { HOUR, authed, call, db, resetDb, type Harness } from './helpers';
 
 let h: Harness;
@@ -67,22 +68,47 @@ describe('manual entries', () => {
       (await h.json('/api/entries', { method: 'POST', json: entry({ end_at: now - 3 * HOUR }) }))
         .body.error,
     ).toBe('end_before_start');
+    // Planned work: anywhere in the current day (settings time zone) is fine,
+    // e.g. 09:00–17:00 entered at 08:00, right up to midnight.
+    const TZ = 'Europe/Oslo';
+    await call(h, 'PATCH', '/api/settings', { timezone: TZ }, 200);
+    const day = dateOf(now, TZ);
+    h.clock.t = startOfDay(day, TZ) + 8 * HOUR;
+    now = h.clock.now();
+    const midnight = startOfDay(addDays(day, 1), TZ);
+    expect(dateOf(midnight - 1, TZ)).toBe(day);
+    const planned = await call(
+      h,
+      'POST',
+      '/api/entries',
+      { start_at: now + HOUR, end_at: now + 9 * HOUR },
+      201,
+    );
+    await call(h, 'POST', '/api/entries', { start_at: midnight - HOUR, end_at: midnight }, 201);
+    const tomorrow = { start_at: midnight - HOUR, end_at: midnight + 1 };
+    expect((await h.json('/api/entries', { method: 'POST', json: tomorrow })).body.error).toBe(
+      'in_future',
+    );
+    expect(
+      (
+        await h.json(`/api/entries/${planned.id}`, {
+          method: 'PATCH',
+          json: { end_at: midnight + 1 },
+        })
+      ).body.error,
+    ).toBe('in_future');
+    // Late in the day the two-hour slack still reaches past midnight.
+    h.clock.t = midnight - HOUR;
+    await call(h, 'POST', '/api/entries', { start_at: midnight, end_at: midnight + HOUR }, 201);
     expect(
       (
         await h.json('/api/entries', {
           method: 'POST',
-          json: entry({ start_at: now + HOUR, end_at: now + 2 * HOUR + 1 }),
+          json: { start_at: midnight, end_at: midnight + HOUR + 1 },
         })
       ).body.error,
     ).toBe('in_future');
-    // Planned work later today: up to two hours ahead is fine.
-    await call(
-      h,
-      'POST',
-      '/api/entries',
-      entry({ start_at: now + HOUR, end_at: now + 2 * HOUR }),
-      201,
-    );
+    now = h.clock.now();
     const long = { start_at: now - 30 * HOUR, end_at: now - HOUR };
     expect((await h.json('/api/entries', { method: 'POST', json: long })).body.error).toBe(
       'too_long',

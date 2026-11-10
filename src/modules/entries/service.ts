@@ -16,6 +16,7 @@ import type { BatchResult, Stmt } from '../../core/ports';
 import { resolveEntryRate, type RateLookup } from '../../core/rates/resolve';
 import type { Settings } from '../../core/settings/defs';
 import { resolveSetting } from '../../core/settings/resolve';
+import { addDays, dateOf, startOfDay } from '../../core/time/tz';
 import type { Entry } from '../../shared/schemas';
 import {
   activeWorkspaceId,
@@ -28,8 +29,10 @@ import type { Ctx } from '../types';
 
 export const MAX_DURATION = 24 * 3600;
 /**
- * How far ahead an entry's start or end may be: enough to log work planned
- * for later today (a meeting at 14:00, entered at 12:30).
+ * An entry's start and end may lie anywhere in the current day (settings
+ * time zone), so a known day can be logged ahead: 09:00–17:00 entered on
+ * the bus at 08:00. Late in the day this slack still reaches past midnight
+ * (a meeting at 23:30–00:30, entered at 23:00).
  */
 export const FUTURE_SLACK = 2 * 3600;
 /**
@@ -146,11 +149,20 @@ async function assertNotLocked(ctx: Ctx, scope: Scope, startAt: number) {
   if (lock) throw lockedPeriod(lock);
 }
 
-function assertNotFuture(ctx: Ctx, ...times: (number | null | undefined)[]) {
-  const limit = ctx.clock.now() + FUTURE_SLACK;
+/** The latest allowed start/end: the end of today, or two hours from now if that is later. */
+export function futureLimit(now: number, timezone: string): number {
+  const endOfToday = startOfDay(addDays(dateOf(now, timezone), 1), timezone);
+  return Math.max(endOfToday, now + FUTURE_SLACK);
+}
+
+function assertNotFuture(ctx: Ctx, timezone: string, ...times: (number | null | undefined)[]) {
+  const limit = futureLimit(ctx.clock.now(), timezone);
   for (const t of times) {
     if (t != null && t > limit)
-      throw badRequest('in_future', 'Times may not be more than 2 hours in the future');
+      throw badRequest(
+        'in_future',
+        'Times may not be later than the end of today (or 2 hours from now)',
+      );
   }
 }
 
@@ -247,7 +259,7 @@ export async function createEntry(
 ): Promise<EntryRow> {
   const settings = await loadSettings(ctx);
   const scope = await deriveScope(ctx, input, null, settings);
-  assertNotFuture(ctx, input.start_at, input.end_at);
+  assertNotFuture(ctx, settings.timezone, input.start_at, input.end_at);
   assertDuration(input.start_at, input.end_at, input.force);
   await assertNotLocked(ctx, scope, input.start_at);
   const now = ctx.clock.now();
@@ -322,7 +334,7 @@ export async function updateEntry(
 
   const start = input.start_at ?? entry.start_at;
   const end = input.end_at ?? entry.end_at;
-  assertNotFuture(ctx, input.start_at, input.end_at);
+  assertNotFuture(ctx, settings.timezone, input.start_at, input.end_at);
   if (end !== null) assertDuration(start, end, input.force);
   else assertTimerNotFuture(ctx, start);
 
@@ -453,7 +465,8 @@ export async function stopTimer(
   const running = await runningEntry(ctx);
   if (!running) throw conflict('no_timer', 'No timer is running');
   const end = input.end_at ?? ctx.clock.now();
-  assertNotFuture(ctx, end);
+  if (input.end_at !== undefined)
+    assertNotFuture(ctx, (await loadSettings(ctx)).timezone, input.end_at);
   let start = running.start_at;
 
   // A period locked while the timer ran (§6 timer edge cases).

@@ -68,7 +68,7 @@ The log shows one week (Monday to Sunday) with the entries for each day and day 
 
 ![Editing an entry in place](screenshots/07-log-edit.png)
 
-Entries cannot be more than 2 hours in the future (a running timer: 5 minutes). Entries longer than 24 hours need a confirmation.
+You can log the rest of today ahead of time, for example 09:00–17:00 while on the bus at 08:00. Entries cannot end later than midnight tonight, or 2 hours from now if that is later (a running timer cannot start more than 5 minutes ahead). Entries longer than 24 hours need a confirmation.
 
 ## Projects, clients and workspaces
 
