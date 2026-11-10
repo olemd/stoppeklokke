@@ -387,7 +387,7 @@ GET    /api/openapi.json
 **Entry validation**
 - `end_at > start_at`. Max duration 24 h per entry (overridable with `force: true`; the UI asks "are you sure").
 - Overlapping entries are allowed but flagged in the UI and in reports. Not blocked, since it is often intentional.
-- Start/end may not be more than 2 h in the future, so work planned for later today can be logged. A running timer's start may be at most 5 min ahead (clock skew only), since it counts up from the start.
+- Start/end may lie anywhere in the current day (settings time zone), so a known day can be logged ahead (09:00–17:00 entered at 08:00); not later than the end of today, or 2 h from now if that is later (work crossing midnight). A running timer's start may be at most 5 min ahead (clock skew only), since it counts up from the start.
 
 **Timer edge cases**
 - A timer running past midnight is never split or stopped automatically (apart from `idle_stop_after_min`). Reports split it across days (§9).
